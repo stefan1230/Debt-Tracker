@@ -41,7 +41,24 @@
             color: #ffffff !important; 
             font-size: 16px !important; 
             height: 38px;
+            width: 100%;
+            box-sizing: border-box;
         }
+        
+        /* Ensure native calendar indicators are touch-triggerable but clean */
+        input[type="month"] {
+            position: relative;
+        }
+        input[type="month"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
         /* Desktop scales down smoothly for a sleek layout look */
         @media (min-width: 768px) { 
             input, select { 
@@ -51,7 +68,6 @@
         }
         
         input:focus, select:focus { outline: none !important; border-color: #555555 !important; }
-        ::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #1f1f1f; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 2px; }
@@ -392,25 +408,32 @@
                                 </div>
                                 <div class="border-t border-zinc-800/80 pt-4">
                                     <h4 class="text-xs font-semibold text-zinc-400 mb-2">Log this month's statement</h4>
-                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                                    
+                                    <div class="flex flex-col gap-3 sm:grid sm:grid-cols-3 sm:gap-3 items-end">
                                         <div>
                                             <label class="text-[10px] text-zinc-500 block mb-1">Month</label>
-                                            <input id="month-${acc.id}" type="month" value="${currentMonthStr}" class="w-full px-2 rounded font-mono">
+                                            <div class="relative w-full">
+                                                <input id="month-${acc.id}" type="month" value="${currentMonthStr}" class="w-full pl-2.5 pr-8 rounded font-mono">
+                                                <div class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                    </svg>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div>
                                             <label class="text-[10px] text-zinc-500 block mb-1">New balance (LKR)</label>
-                                            <input id="newBal-${acc.id}" type="number" placeholder="e.g. 285000" class="w-full px-2 rounded font-mono">
+                                            <input id="newBal-${acc.id}" type="number" placeholder="e.g. 285000" class="w-full px-2.5 rounded font-mono">
                                         </div>
-                                        <div class="flex gap-2 items-center">
-                                            <div class="flex-1">
-                                                <label class="text-[10px] text-zinc-500 block mb-1">Payment made (LKR)</label>
-                                                <input id="payMade-${acc.id}" type="number" placeholder="e.g. 52000" class="w-full px-2 rounded font-mono">
-                                            </div>
-                                            <button onclick="commitStatement('${acc.id}')" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-100 px-4 rounded-md text-xs font-bold transition-all border border-zinc-700 h-[38px] sm:h-[34px] self-end flex items-center justify-center">
-                                                + Add
-                                            </button>
+                                        <div>
+                                            <label class="text-[10px] text-zinc-500 block mb-1">Payment made (LKR)</label>
+                                            <input id="payMade-${acc.id}" type="number" placeholder="e.g. 52000" class="w-full px-2.5 rounded font-mono">
                                         </div>
                                     </div>
+                                    
+                                    <button onclick="commitStatement('${acc.id}')" class="w-full sm:w-auto bg-zinc-100 hover:bg-zinc-200 text-zinc-900 font-bold h-[38px] sm:h-[34px] rounded text-xs transition-colors mt-3 flex items-center justify-center px-5">
+                                        Confirm & Add Log Entry
+                                    </button>
                                 </div>
                                 ${statementsMarkup}
                             </div>
