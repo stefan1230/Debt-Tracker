@@ -98,12 +98,11 @@
     <script>
         // --- STEP 4 CONFIGURATION LINK MATRIX ---
         
-        const SUPABASE_URL = "https://kvzlzxhuufeaibiezytw.supabase.co/rest/v1/"; 
+        const SUPABASE_URL = "https://kvzlzxhuufeaibiezytw.supabase.co"; 
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt2emx6eGh1dWZlYWliaWV6eXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNzU4NTcsImV4cCI6MjA5NDg1MTg1N30.dT1quEcbWCBB-oEj_659TBYMssCzA0MVaXdJVetc8Fg";
         
-        let supabaseClient = (SUPABASE_URL !== "https://kvzlzxhuufeaibiezytw.supabase.co/rest/v1/") ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
-        let activeUserSession = null;
-
+        // let supabaseClient = (SUPABASE_URL !== "https://kvzlzxhuufeaibiezytw.supabase.co/rest/v1/") ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+        let supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); let activeUserSession = null;
         const DB_NAME = 'IntegratedPortfolioTrackerDB';
         const DB_VERSION = 1;
         let db;
