@@ -3,38 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Debt Payoff Tracker</title>
+    <title>Financial Portfolio Workspace</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { 
-            background-color: #1a1a1a; 
-            color: #f1f5f9;
-            font-family: 'Inter', sans-serif; 
-        }
+        body { background-color: #1a1a1a; color: #f1f5f9; font-family: 'Inter', sans-serif; }
         .stat-card { background-color: #222222; border: 1px solid #2d2d2d; }
         .account-card { background-color: #262626; border: 1px solid #333333; }
-        input {
-            background-color: #2a2a2a !important;
-            border: 1px solid #444444 !important;
-            color: #ffffff !important;
-        }
-        input:focus { outline: none !important; border-color: #555555 !important; }
+        .savings-card { background-color: #1e293b; border: 1px solid #334155; }
+        input, select { background-color: #2a2a2a !important; border: 1px solid #444444 !important; color: #ffffff !important; }
+        input:focus, select:focus { outline: none !important; border-color: #555555 !important; }
         ::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
     </style>
 </head>
-<body class="p-4 md:p-8 min-h-screen">
-    <div class="max-w-5xl mx-auto">
-        
+<body class="p-4 md:p-8 min-h-screen flex items-center justify-center">
+
+    <div id="authContainer" class="w-full max-w-sm account-card p-6 rounded-xl shadow-2xl">
+        <h2 class="text-xl font-bold mb-1 text-zinc-100">Private Financial Gateway</h2>
+        <p class="text-xs text-zinc-500 mb-4">Provide parameters to sync secure device storage engine cloud state.</p>
+        <div class="space-y-3">
+            <div>
+                <label class="text-[10px] text-zinc-400 font-medium block mb-1">Email Address</label>
+                <input id="loginEmail" type="email" placeholder="you@example.com" class="w-full text-xs p-2.5 rounded">
+            </div>
+            <div>
+                <label class="text-[10px] text-zinc-400 font-medium block mb-1">Password</label>
+                <input id="loginPassword" type="password" placeholder="••••••••" class="w-full text-xs p-2.5 rounded">
+            </div>
+            <button onclick="handleCloudAuthentication()" class="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-900 font-bold p-2 rounded text-xs transition-colors mt-2">
+                Establish Session & Sync
+            </button>
+            <p id="authError" class="text-rose-400 text-xs text-center hidden mt-2"></p>
+        </div>
+    </div>
+
+    <div id="appContainer" class="w-full max-w-5xl hidden self-start">
         <header class="flex justify-between items-center mb-6 border-b border-zinc-800 pb-4">
             <div>
-                <h1 class="text-xl font-bold text-zinc-100">Credit Statement Ledger</h1>
-                <p class="text-xs text-zinc-500">Reverse-engineering interest through statement variations</p>
+                <h1 class="text-xl font-bold text-zinc-100">Cloud Connected Ledger Workspace</h1>
+                <p id="syncBadge" class="text-xs text-emerald-400">● Connected to Free Supabase Cloud Instance</p>
             </div>
             <div class="flex gap-2">
-                <button onclick="exportEngineData()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg text-xs font-medium transition-all">Export JSON</button>
+                <button onclick="handleSessionSignOut()" class="bg-zinc-800 hover:bg-zinc-700 text-rose-400 px-3 py-1.5 rounded-lg text-xs font-medium transition-all">Sign Out</button>
+                <button onclick="exportEngineData()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg text-xs font-medium transition-all">Backup JSON</button>
                 <input type="file" id="importFile" class="hidden" onchange="importEngineData(event)">
-                <button onclick="document.getElementById('importFile').click()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg text-xs font-medium transition-all">Import JSON</button>
+                <button onclick="document.getElementById('importFile').click()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg text-xs font-medium transition-all">Restore JSON</button>
             </div>
         </header>
 
@@ -44,8 +58,8 @@
                 <p id="statRemaining" class="text-lg font-bold text-amber-500 mt-1">LKR 0</p>
             </div>
             <div class="stat-card p-4 rounded-xl">
-                <p class="text-xs text-zinc-400 font-medium">Actual balance drop</p>
-                <p id="statDrop" class="text-lg font-bold text-emerald-500 mt-1">LKR 0</p>
+                <p class="text-xs text-zinc-400 font-medium">Total capital saved</p>
+                <p id="statSaved" class="text-lg font-bold text-emerald-400 mt-1">LKR 0</p>
             </div>
             <div class="stat-card p-4 rounded-xl">
                 <p class="text-xs text-zinc-400 font-medium">Interest paid (est.)</p>
@@ -57,37 +71,182 @@
             </div>
         </div>
 
-        <div id="cardsContainer" class="space-y-6"></div>
-
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-6">
+                <h2 class="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-2 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span> Liabilities & Statements
+                </h2>
+                <div id="cardsContainer" class="space-y-6"></div>
+            </div>
+            <div class="space-y-6">
+                <h2 class="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-2 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Savings & Capital Goals
+                </h2>
+                <div class="account-card p-4 rounded-xl space-y-3">
+                    <h3 class="text-xs font-semibold text-zinc-300">Initialize Savings Goal</h3>
+                    <div class="space-y-2">
+                        <input id="newSaveName" type="text" placeholder="Goal Label (e.g. Emergency Fund)" class="w-full text-xs p-2 rounded">
+                        <input id="newSaveTarget" type="number" placeholder="Target Amount (LKR)" class="w-full text-xs p-2 rounded">
+                        <button onclick="createNewSavingsGoal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white p-2 rounded text-xs font-bold transition-all">Create Goal</button>
+                    </div>
+                </div>
+                <div id="savingsContainer" class="space-y-4"></div>
+            </div>
+        </div>
     </div>
 
     <script>
-        const DB_NAME = 'MonthlyStatementTrackerDB';
+        // --- STEP 4 CONFIGURATION LINK MATRIX ---
+        
+        const SUPABASE_URL = "https://kvzlzxhuufeaibiezytw.supabase.co/rest/v1/"; 
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt2emx6eGh1dWZlYWliaWV6eXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNzU4NTcsImV4cCI6MjA5NDg1MTg1N30.dT1quEcbWCBB-oEj_659TBYMssCzA0MVaXdJVetc8Fg";
+        
+        let supabaseClient = (SUPABASE_URL !== "https://kvzlzxhuufeaibiezytw.supabase.co/rest/v1/") ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+        let activeUserSession = null;
+
+        const DB_NAME = 'IntegratedPortfolioTrackerDB';
         const DB_VERSION = 1;
         let db;
 
+        // Establish core native local sandbox storage engine array structures
         const request = indexedDB.open(DB_NAME, DB_VERSION);
         request.onupgradeneeded = e => {
             db = e.target.result;
             db.createObjectStore('accounts', { keyPath: 'id' });
             db.createObjectStore('statements', { keyPath: 'id', autoIncrement: true });
+            db.createObjectStore('savings', { keyPath: 'id', autoIncrement: true });
         };
         request.onsuccess = e => { 
             db = e.target.result; 
-            seedInitialAccountsData(() => renderWorkspace());
+            evaluateUserAuthenticationState();
         };
 
+        async function evaluateUserAuthenticationState() {
+            if (!supabaseClient) {
+                // If API parameters are not configured, fallback gracefully to strict local offline sandbox framework
+                document.getElementById('authContainer').classList.add('hidden');
+                document.getElementById('appContainer').classList.remove('hidden');
+                document.body.className = "p-4 md:p-8 min-h-screen";
+                document.getElementById('syncBadge').innerText = "● Running offline local storage mode";
+                document.getElementById('syncBadge').className = "text-xs text-amber-500";
+                seedInitialAccountsData(() => renderWorkspace());
+                return;
+            }
+
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                activeUserSession = session.user;
+                transitionUIToApplicationView();
+            }
+        }
+
+        async function handleCloudAuthentication() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errLabel = document.getElementById('authError');
+
+            if (!supabaseClient) return alert("System Setup Error: Cloud endpoints are missing configurations.");
+
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) {
+                errLabel.innerText = error.message;
+                errLabel.classList.remove('hidden');
+            } else {
+                activeUserSession = data.user;
+                errLabel.classList.add('hidden');
+                transitionUIToApplicationView();
+            }
+        }
+
+        async function transitionUIToApplicationView() {
+            document.getElementById('authContainer').classList.add('hidden');
+            document.getElementById('appContainer').classList.remove('hidden');
+            document.body.className = "p-4 md:p-8 min-h-screen";
+            
+            // Execute absolute structural cloud database synchronization download override pass
+            await synchronizeStorageStateFromCloudCloud();
+            seedInitialAccountsData(() => renderWorkspace());
+        }
+
+        async function handleSessionSignOut() {
+            if (supabaseClient) await supabaseClient.auth.signOut();
+            window.location.reload();
+        }
+
+        // Backs up Local Database Records and seamlessly pushes them up to your private Cloud Document Bucket automatically
+        async function forceCloudStateBackupSynchronization() {
+            if (!supabaseClient || !activeUserSession) return;
+            document.getElementById('syncBadge').innerText = "🔄 Uploading real-time updates...";
+            document.getElementById('syncBadge').className = "text-xs text-blue-400";
+
+            const tx = db.transaction(['accounts', 'statements', 'savings'], 'readonly');
+            const dataDump = {};
+
+            tx.objectStore('accounts').getAll().onsuccess = e1 => {
+                dataDump.accounts = e1.target.result;
+                tx.objectStore('statements').getAll().onsuccess = e2 => {
+                    dataDump.statements = e2.target.result;
+                    tx.objectStore('savings').getAll().onsuccess = e3 => {
+                        dataDump.savings = e3.target.result;
+                        
+                        // Upsert payload atomic data row indexed by signed-in profile owner ID 
+                        supabaseClient.from('user_financial_states').upsert({
+                            user_id: activeUserSession.id,
+                            payload: dataDump,
+                            updated_at: new Date().toISOString()
+                        }).then(({ error }) => {
+                            if (!error) {
+                                document.getElementById('syncBadge').innerText = "● Cloud State Synced Seamlessly";
+                                document.getElementById('syncBadge').className = "text-xs text-emerald-400";
+                            }
+                        });
+                    };
+                };
+            };
+        }
+
+        async function synchronizeStorageStateFromCloudCloud() {
+            if (!supabaseClient || !activeUserSession) return;
+            
+            const { data, error } = await supabaseClient
+                .from('user_financial_states')
+                .select('payload')
+                .eq('user_id', activeUserSession.id)
+                .maybeSingle();
+
+            if (data && data.payload) {
+                const payload = data.payload;
+                const tx = db.transaction(['accounts', 'statements', 'savings'], 'readwrite');
+                
+                tx.objectStore('accounts').clear();
+                tx.objectStore('statements').clear();
+                tx.objectStore('savings').clear();
+
+                if (payload.accounts) payload.accounts.forEach(a => tx.objectStore('accounts').put(a));
+                if (payload.statements) payload.statements.forEach(s => tx.objectStore('statements').add(s));
+                if (payload.savings) payload.savings.forEach(s => tx.objectStore('savings').add(s));
+
+                return new Promise(resolve => tx.oncomplete = resolve);
+            }
+        }
+
         function seedInitialAccountsData(callback) {
-            const tx = db.transaction(['accounts'], 'readwrite');
-            const store = tx.objectStore('accounts');
-            store.getAll().onsuccess = (e) => {
+            const tx = db.transaction(['accounts', 'savings'], 'readwrite');
+            const accStore = tx.objectStore('accounts');
+            const saveStore = tx.objectStore('savings');
+
+            accStore.getAll().onsuccess = (e) => {
                 if (e.target.result.length === 0) {
                     const defaultAccounts = [
-                        { id: 'dfcc', name: 'DFCC credit card', limit: 300000, currentBalance: 300000, initialBalance: 300000, strategy: 'attack first', strategyColor: 'bg-amber-700/40 text-amber-300 border border-amber-600/30' },
-                        { id: 'hnb', name: 'HNB credit card', limit: 150000, currentBalance: 150000, initialBalance: 150000, strategy: 'minimums for now', strategyColor: 'bg-blue-900/40 text-blue-300 border border-blue-600/30' }
+                        { id: 'dfcc', name: 'DFCC credit card', limit: 300000, currentBalance: 269405, initialBalance: 300000, strategy: 'attack first', strategyColor: 'bg-amber-700/40 text-amber-300 border border-amber-600/30' },
+                        { id: 'hnb', name: 'HNB credit card', limit: 150000, currentBalance: 139175, initialBalance: 150000, strategy: 'minimums for now', strategyColor: 'bg-blue-900/40 text-blue-300 border border-blue-600/30' }
                     ];
-                    defaultAccounts.forEach(acc => store.put(acc));
-                    tx.oncomplete = callback;
+                    defaultAccounts.forEach(acc => accStore.put(acc));
+                    saveStore.add({ name: 'Emergency Fund', target: 250000, current: 0 });
+                    tx.oncomplete = () => {
+                        forceCloudStateBackupSynchronization();
+                        callback();
+                    };
                 } else {
                     callback();
                 }
@@ -96,8 +255,11 @@
 
         function renderWorkspace() {
             const container = document.getElementById('cardsContainer');
+            const savingsContainer = document.getElementById('savingsContainer');
             container.innerHTML = '';
-            const currentMonthStr = new Date().toISOString().slice(0, 7); // Generates "YYYY-MM" format
+            savingsContainer.innerHTML = '';
+            
+            const currentMonthStr = new Date().toISOString().slice(0, 7);
 
             db.transaction('accounts').objectStore('accounts').getAll().onsuccess = (accEvent) => {
                 const accounts = accEvent.target.result;
@@ -106,7 +268,6 @@
                     const allStatements = stateEvent.target.result;
 
                     let totalDebtRemaining = 0;
-                    let totalActualDrop = 0;
                     let totalInterestPaid = 0;
                     let distinctMonths = new Set();
 
@@ -119,9 +280,7 @@
                         const paidPercentage = Math.min(100, Math.max(0, ((acc.limit - dynamicBalance) / acc.limit) * 100));
 
                         totalDebtRemaining += dynamicBalance;
-                        
                         cardStatements.forEach(s => {
-                            totalActualDrop += s.balanceDrop;
                             totalInterestPaid += s.interestCharged;
                             distinctMonths.add(s.month);
                         });
@@ -151,25 +310,18 @@
                                         ${acc.strategy}
                                     </span>
                                 </div>
-
                                 <div class="flex justify-between items-baseline mb-2">
                                     <span class="text-xs text-zinc-400">Current balance</span>
                                     <span class="text-lg font-bold text-zinc-100 font-mono">LKR ${dynamicBalance.toLocaleString()}</span>
                                 </div>
-
                                 <div class="mb-6">
                                     <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
                                         <div class="bg-zinc-600 h-full transition-all duration-500" style="width: ${paidPercentage}%"></div>
                                     </div>
                                     <span class="text-[11px] text-zinc-500 mt-1 block">${paidPercentage.toFixed(0)}% cleared</span>
                                 </div>
-
                                 <div class="border-t border-zinc-800/80 pt-4">
                                     <h4 class="text-xs font-semibold text-zinc-400 mb-2">Log this month's statement</h4>
-                                    <p class="text-[11px] text-zinc-500 bg-zinc-900/30 p-2.5 rounded border border-zinc-800/40 mb-4 leading-relaxed">
-                                        Enter the <strong class="text-zinc-300">new balance</strong> from your statement + what you paid this month. The tracker works out how much was interest.
-                                    </p>
-                                    
                                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
                                         <div>
                                             <label class="text-[10px] text-zinc-500 block mb-1">Month</label>
@@ -190,17 +342,50 @@
                                         </div>
                                     </div>
                                 </div>
-
                                 ${statementsMarkup}
                             </div>
                         `;
                     });
 
-                    // Render Dashboard Counters
-                    document.getElementById('statRemaining').innerText = `LKR ${totalDebtRemaining.toLocaleString()}`;
-                    document.getElementById('statDrop').innerText = `LKR ${totalActualDrop.toLocaleString()}`;
-                    document.getElementById('statInterest').innerText = `LKR ${totalInterestPaid.toLocaleString()}`;
-                    document.getElementById('statMonths').innerText = distinctMonths.size;
+                    db.transaction('savings').objectStore('savings').getAll().onsuccess = (saveEvent) => {
+                        const savingsGoals = saveEvent.target.result;
+                        let totalSavedCapital = 0;
+
+                        savingsGoals.forEach(goal => {
+                            totalSavedCapital += goal.current;
+                            const savePercent = Math.min(100, Math.max(0, (goal.current / goal.target) * 100));
+
+                            savingsContainer.innerHTML += `
+                                <div class="savings-card p-4 rounded-xl shadow-md">
+                                    <div class="flex justify-between items-start mb-1">
+                                        <h3 class="text-sm font-bold text-slate-200">${goal.name}</h3>
+                                        <button onclick="deleteSavingsGoal(${goal.id})" class="text-[10px] text-slate-500 hover:text-rose-400 transition-colors">Delete</button>
+                                    </div>
+                                    <p class="text-xs text-slate-400 font-mono mb-3">Target: LKR ${goal.target.toLocaleString()}</p>
+                                    <div class="flex justify-between items-baseline mb-1 text-xs">
+                                        <span class="text-emerald-400 font-bold font-mono">LKR ${goal.current.toLocaleString()}</span>
+                                        <span class="text-slate-400 text-[10px]">${savePercent.toFixed(0)}% reached</span>
+                                    </div>
+                                    <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden mb-4 border border-slate-800">
+                                        <div class="bg-emerald-500 h-full transition-all duration-500" style="width: ${savePercent}%"></div>
+                                    </div>
+                                    <div class="flex gap-1.5 items-center pt-2 border-t border-slate-700/40">
+                                        <select id="saveAction-${goal.id}" class="text-[10px] p-1.5 rounded bg-slate-800">
+                                            <option value="add">Deposit (+)</option>
+                                            <option value="sub">Withdraw (-)</option>
+                                        </select>
+                                        <input id="saveAmt-${goal.id}" type="number" placeholder="Amount" class="w-full text-[10px] p-1.5 rounded font-mono">
+                                        <button onclick="mutateSavingsCapital(${goal.id})" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1.5 rounded text-[10px] font-bold transition-all">Go</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        document.getElementById('statRemaining').innerText = `LKR ${totalDebtRemaining.toLocaleString()}`;
+                        document.getElementById('statSaved').innerText = `LKR ${totalSavedCapital.toLocaleString()}`;
+                        document.getElementById('statInterest').innerText = `LKR ${totalInterestPaid.toLocaleString()}`;
+                        document.getElementById('statMonths').innerText = distinctMonths.size;
+                    };
                 };
             };
         }
@@ -214,9 +399,7 @@
             const paymentMade = parseFloat(payMadeInput.value);
             const selectedMonth = monthInput.value;
 
-            if (isNaN(newBalance) || isNaN(paymentMade) || !selectedMonth) {
-                return alert("Validation Mismatch: Inputs cannot be left empty.");
-            }
+            if (isNaN(newBalance) || isNaN(paymentMade) || !selectedMonth) return alert("Validation Error: Please fill out all parameters.");
 
             const tx = db.transaction(['accounts', 'statements'], 'readwrite');
             const accStore = tx.objectStore('accounts');
@@ -227,50 +410,96 @@
                 if (!account) return;
 
                 const previousBalance = account.currentBalance;
-                
-                // Accountancy Reverse-Engineering Logic:
                 const expectedBalanceWithoutInterest = previousBalance - paymentMade;
                 const interestCharged = Math.max(0, newBalance - expectedBalanceWithoutInterest);
-                const balanceDrop = Math.max(0, account.initialBalance - newBalance);
+                const balanceDrop = Math.max(0, previousBalance - newBalance);
 
                 account.currentBalance = newBalance;
                 accStore.put(account);
-
-                stateStore.add({
-                    accountId,
-                    month: selectedMonth,
-                    newBalance,
-                    paymentMade,
-                    interestCharged,
-                    balanceDrop
-                });
+                stateStore.add({ accountId, month: selectedMonth, newBalance, paymentMade, interestCharged, balanceDrop });
             };
 
             tx.oncomplete = () => {
                 newBalInput.value = '';
                 payMadeInput.value = '';
+                forceCloudStateBackupSynchronization();
+                renderWorkspace();
+            };
+        }
+
+        function createNewSavingsGoal() {
+            const nameInput = document.getElementById('newSaveName');
+            const targetInput = document.getElementById('newSaveTarget');
+            const name = nameInput.value.trim();
+            const target = parseFloat(targetInput.value);
+
+            if (!name || isNaN(target) || target <= 0) return alert("Validation Mismatch: Provide a label name and target metric.");
+
+            const tx = db.transaction(['savings'], 'readwrite');
+            tx.objectStore('savings').add({ name, target, current: 0 });
+            tx.oncomplete = () => {
+                nameInput.value = '';
+                targetInput.value = '';
+                forceCloudStateBackupSynchronization();
+                renderWorkspace();
+            };
+        }
+
+        function mutateSavingsCapital(goalId) {
+            const amtInput = document.getElementById(`saveAmt-${goalId}`);
+            const actionSelect = document.getElementById(`saveAction-${goalId}`);
+            const amount = parseFloat(amtInput.value);
+            const action = actionSelect.value;
+
+            if (isNaN(amount) || amount <= 0) return alert("Validation Error: Input value must be a functional positive number.");
+
+            const tx = db.transaction(['savings'], 'readwrite');
+            const store = tx.objectStore('savings');
+
+            store.get(goalId).onsuccess = (e) => {
+                const goal = e.target.result;
+                if (!goal) return;
+                goal.current = (action === 'add') ? goal.current + amount : Math.max(0, goal.current - amount);
+                store.put(goal);
+            };
+
+            tx.oncomplete = () => {
+                amtInput.value = '';
+                forceCloudStateBackupSynchronization();
+                renderWorkspace();
+            };
+        }
+
+        function deleteSavingsGoal(id) {
+            if (!confirm("Delete this savings goal?")) return;
+            const tx = db.transaction(['savings'], 'readwrite');
+            tx.objectStore('savings').delete(id);
+            tx.oncomplete = () => {
+                forceCloudStateBackupSynchronization();
                 renderWorkspace();
             };
         }
 
         function formatMonthLabel(monthString) {
             const [year, month] = monthString.split('-');
-            const date = new Date(year, parseInt(month) - 1);
-            return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            return new Date(year, parseInt(month) - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
         }
 
         function exportEngineData() {
             const dump = {};
-            const tx = db.transaction(['accounts', 'statements'], 'readonly');
+            const tx = db.transaction(['accounts', 'statements', 'savings'], 'readonly');
             tx.objectStore('accounts').getAll().onsuccess = e1 => {
                 dump.accounts = e1.target.result;
                 tx.objectStore('statements').getAll().onsuccess = e2 => {
                     dump.statements = e2.target.result;
-                    const blob = new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' });
-                    const triggerLink = document.createElement('a');
-                    triggerLink.href = URL.createObjectURL(blob);
-                    triggerLink.download = `statement_tracker_dump_${new Date().getTime()}.json`;
-                    triggerLink.click();
+                    tx.objectStore('savings').getAll().onsuccess = e3 => {
+                        dump.savings = e3.target.result;
+                        const blob = new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' });
+                        const a = document.createElement('a');
+                        a.href = URL.createObjectURL(blob);
+                        a.download = `portfolio_backup_${new Date().getTime()}.json`;
+                        a.click();
+                    };
                 };
             };
         }
@@ -283,93 +512,45 @@
             reader.onload = (e) => {
                 try {
                     const parsed = JSON.parse(e.target.result);
-                    const tx = db.transaction(['accounts', 'statements'], 'readwrite');
+                    const tx = db.transaction(['accounts', 'statements', 'savings'], 'readwrite');
                     const accStore = tx.objectStore('accounts');
                     const stateStore = tx.objectStore('statements');
+                    const saveStore = tx.objectStore('savings');
 
-                    accStore.clear();
-                    stateStore.clear();
+                    accStore.clear(); stateStore.clear(); saveStore.clear();
 
-                    // --- LEGACY BACKWARD MIGRATION PARSER LAYER ---
-                    if (parsed.debts) {
-                        // Maps historical record fields from your JSON data safely
-                        let mappedHNBBalance = 150000;
-                        let mappedDFCCBalance = 300000;
-                        let aggregatedRepayments = { hnb: 0, dfcc: 0 };
-
-                        parsed.debts.forEach(d => {
-                            const normalizedId = d.name.toLowerCase().includes('hnb') ? 'hnb' : 'dfcc';
-                            if (normalizedId === 'hnb') mappedHNBBalance = d.balance;
-                            if (normalizedId === 'dfcc') mappedDFCCBalance = d.balance;
-                        });
-
-                        // Populate existing transaction histories into the structural view logs
-                        if (parsed.logs) {
-                            parsed.logs.forEach(log => {
-                                const matchedId = log.account.toLowerCase().includes('hnb') ? 'hnb' : 'dfcc';
-                                if (log.type.includes('Repayment') || log.amount < 0) {
-                                    aggregatedRepayments[matchedId] += Math.abs(log.amount);
-                                }
-                            });
-                        }
-
-                        // Save Accounts State mapping data smoothly
-                        accStore.put({
-                            id: 'dfcc',
-                            name: 'DFCC credit card',
-                            limit: 300000,
-                            currentBalance: mappedDFCCBalance,
-                            initialBalance: 300000,
-                            strategy: 'attack first',
-                            strategyColor: 'bg-amber-700/40 text-amber-300 border border-amber-600/30'
-                        });
-
-                        accStore.put({
-                            id: 'hnb',
-                            name: 'HNB credit card',
-                            limit: 150000,
-                            currentBalance: mappedHNBBalance,
-                            initialBalance: 150000,
-                            strategy: 'minimums for now',
-                            strategyColor: 'bg-blue-900/40 text-blue-300 border border-blue-600/30'
-                        });
-
-                        // Translate transaction checkpoints into simulated statements
-                        const activeMonth = new Date().toISOString().slice(0, 7);
-                        if (aggregatedRepayments.dfcc > 0) {
-                            stateStore.add({
-                                accountId: 'dfcc',
-                                month: activeMonth,
-                                newBalance: mappedDFCCBalance,
-                                paymentMade: aggregatedRepayments.dfcc,
-                                interestCharged: 0,
-                                balanceDrop: 300000 - mappedDFCCBalance
-                            });
-                        }
-                        if (aggregatedRepayments.hnb > 0) {
-                            stateStore.add({
-                                accountId: 'hnb',
-                                month: activeMonth,
-                                newBalance: mappedHNBBalance,
-                                paymentMade: aggregatedRepayments.hnb,
-                                interestCharged: 0,
-                                balanceDrop: 150000 - mappedHNBBalance
-                            });
-                        }
-                    } 
-                    // Native parsing layer fallback
-                    else if (parsed.accounts) {
+                    if (parsed.accounts) {
                         parsed.accounts.forEach(a => accStore.put(a));
                         if (parsed.statements) parsed.statements.forEach(s => stateStore.add(s));
+                        if (parsed.savings) parsed.savings.forEach(s => saveStore.add(s));
+                    } else if (parsed.debts) {
+                        let mappedBalances = { hnb: 139175, dfcc: 269405 };
+                        let repayments = { hnb: 0, dfcc: 0 };
+                        parsed.debts.forEach(d => {
+                            const id = d.name.toLowerCase().includes('hnb') ? 'hnb' : 'dfcc';
+                            mappedBalances[id] = d.balance;
+                        });
+                        if (parsed.logs) {
+                            parsed.logs.forEach(l => {
+                                const id = l.account.toLowerCase().includes('hnb') ? 'hnb' : 'dfcc';
+                                if (l.type.includes('Repayment') || l.amount < 0) repayments[id] += Math.abs(l.amount);
+                            });
+                        }
+                        accStore.put({ id: 'dfcc', name: 'DFCC credit card', limit: 300000, currentBalance: mappedBalances.dfcc, initialBalance: 300000, strategy: 'attack first', strategyColor: 'bg-amber-700/40 text-amber-300 border border-amber-600/30' });
+                        accStore.put({ id: 'hnb', name: 'HNB credit card', limit: 150000, currentBalance: mappedBalances.hnb, initialBalance: 150000, strategy: 'minimums for now', strategyColor: 'bg-blue-900/40 text-blue-300 border border-blue-600/30' });
+                        
+                        const currentMonth = new Date().toISOString().slice(0, 7);
+                        if (repayments.dfcc > 0) stateStore.add({ accountId: 'dfcc', month: currentMonth, newBalance: mappedBalances.dfcc, paymentMade: repayments.dfcc, interestCharged: 0, balanceDrop: 300000 - mappedBalances.dfcc });
+                        if (repayments.hnb > 0) stateStore.add({ accountId: 'hnb', month: currentMonth, newBalance: mappedBalances.hnb, paymentMade: repayments.hnb, interestCharged: 0, balanceDrop: 150000 - mappedBalances.hnb });
+                        saveStore.add({ name: 'Emergency Fund', target: 250000, current: 0 });
                     }
 
                     tx.oncomplete = () => {
-                        alert("Database State Synchronized Successfully.");
+                        alert("Local storage populated.");
+                        forceCloudStateBackupSynchronization();
                         renderWorkspace();
                     };
-                } catch (err) {
-                    alert("Import Error: Verification parameters broke during verification parse step.");
-                }
+                } catch (err) { alert("Import Error."); }
             };
             reader.readAsText(file);
         }
