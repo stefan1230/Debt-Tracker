@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debt Payoff Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #1a1a1a; 
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif; 
+        }
+        .stat-card { background-color: #222222; border: 1px solid #2d2d2d; }
+        .account-card { background-color: #262626; border: 1px solid #333333; }
+        input {
+            background-color: #2a2a2a !important;
+            border: 1px solid #444444 !important;
+            color: #ffffff !important;
+        }
+        input:focus { outline: none !important; border-color: #555555 !important; }
+        ::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+    </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen">
+    <div class="max-w-5xl mx-auto">
+        
+        <header class="flex justify-between items-center mb-6 border-b border-zinc-800 pb-4">
+            <div>
+                <h1 class="text-xl font-bold text-zinc-100">Credit Statement Ledger</h1>
+                <p class="text-xs text-zinc-500">Reverse-engineering interest through statement variations</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="exportEngineData()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg text-xs font-medium transition-all">Export JSON</button>
+                <input type="file" id="importFile" class="hidden" onchange="importEngineData(event)">
+                <button onclick="document.getElementById('importFile').click()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg text-xs font-medium transition-all">Import JSON</button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="stat-card p-4 rounded-xl">
+                <p class="text-xs text-zinc-400 font-medium">Total debt remaining</p>
+                <p id="statRemaining" class="text-lg font-bold text-amber-500 mt-1">LKR 0</p>
+            </div>
+            <div class="stat-card p-4 rounded-xl">
+                <p class="text-xs text-zinc-400 font-medium">Actual balance drop</p>
+                <p id="statDrop" class="text-lg font-bold text-emerald-500 mt-1">LKR 0</p>
+            </div>
+            <div class="stat-card p-4 rounded-xl">
+                <p class="text-xs text-zinc-400 font-medium">Interest paid (est.)</p>
+                <p id="statInterest" class="text-lg font-bold text-rose-500 mt-1">LKR 0</p>
+            </div>
+            <div class="stat-card p-4 rounded-xl">
+                <p class="text-xs text-zinc-400 font-medium">Months tracked</p>
+                <p id="statMonths" class="text-lg font-bold text-zinc-100 mt-1">0</p>
+            </div>
+        </div>
+
+        <div id="cardsContainer" class="space-y-6"></div>
+
+    </div>
+
+    <script>
+        const DB_NAME = 'MonthlyStatementTrackerDB';
+        const DB_VERSION = 1;
+        let db;
+
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = e => {
+            db = e.target.result;
+            db.createObjectStore('accounts', { keyPath: 'id' });
+            db.createObjectStore('statements', { keyPath: 'id', autoIncrement: true });
+        };
+        request.onsuccess = e => { 
+            db = e.target.result; 
+            seedInitialAccountsData(() => renderWorkspace());
+        };
+
+        function seedInitialAccountsData(callback) {
+            const tx = db.transaction(['accounts'], 'readwrite');
+            const store = tx.objectStore('accounts');
+            store.getAll().onsuccess = (e) => {
+                if (e.target.result.length === 0) {
+                    const defaultAccounts = [
+                        { id: 'dfcc', name: 'DFCC credit card', limit: 300000, currentBalance: 300000, initialBalance: 300000, strategy: 'attack first', strategyColor: 'bg-amber-700/40 text-amber-300 border border-amber-600/30' },
+                        { id: 'hnb', name: 'HNB credit card', limit: 150000, currentBalance: 150000, initialBalance: 150000, strategy: 'minimums for now', strategyColor: 'bg-blue-900/40 text-blue-300 border border-blue-600/30' }
+                    ];
+                    defaultAccounts.forEach(acc => store.put(acc));
+                    tx.oncomplete = callback;
+                } else {
+                    callback();
+                }
+            };
+        }
+
+        function renderWorkspace() {
+            const container = document.getElementById('cardsContainer');
+            container.innerHTML = '';
+            const currentMonthStr = new Date().toISOString().slice(0, 7); // Generates "YYYY-MM" format
+
+            db.transaction('accounts').objectStore('accounts').getAll().onsuccess = (accEvent) => {
+                const accounts = accEvent.target.result;
+
+                db.transaction('statements').objectStore('statements').getAll().onsuccess = (stateEvent) => {
+                    const allStatements = stateEvent.target.result;
+
+                    let totalDebtRemaining = 0;
+                    let totalActualDrop = 0;
+                    let totalInterestPaid = 0;
+                    let distinctMonths = new Set();
+
+                    accounts.forEach(acc => {
+                        const cardStatements = allStatements
+                            .filter(s => s.accountId === acc.id)
+                            .sort((a,b) => a.month.localeCompare(b.month));
+
+                        let dynamicBalance = acc.currentBalance;
+                        const paidPercentage = Math.min(100, Math.max(0, ((acc.limit - dynamicBalance) / acc.limit) * 100));
+
+                        totalDebtRemaining += dynamicBalance;
+                        
+                        cardStatements.forEach(s => {
+                            totalActualDrop += s.balanceDrop;
+                            totalInterestPaid += s.interestCharged;
+                            distinctMonths.add(s.month);
+                        });
+
+                        let statementsMarkup = `<p class="text-xs text-zinc-500 text-center py-4">No statements logged yet</p>`;
+                        if (cardStatements.length > 0) {
+                            statementsMarkup = `<div class="space-y-2 mt-4 max-h-48 overflow-y-auto pr-1">`;
+                            cardStatements.forEach(s => {
+                                statementsMarkup += `
+                                    <div class="flex flex-wrap justify-between items-center text-xs bg-zinc-900/40 p-3 rounded-lg border border-zinc-800/60 gap-2">
+                                        <div class="font-medium text-zinc-300">${formatMonthLabel(s.month)}</div>
+                                        <div class="flex gap-4 font-mono">
+                                            <span class="text-zinc-400">Paid: <strong class="text-zinc-200">${s.paymentMade.toLocaleString()}</strong></span>
+                                            <span class="text-emerald-400">Drop: <strong>${s.balanceDrop.toLocaleString()}</strong></span>
+                                            <span class="text-rose-400">Interest: <strong>${s.interestCharged.toLocaleString()}</strong></span>
+                                        </div>
+                                    </div>`;
+                            });
+                            statementsMarkup += `</div>`;
+                        }
+
+                        container.innerHTML += `
+                            <div class="account-card p-6 rounded-xl shadow-lg">
+                                <div class="flex justify-between items-start mb-4">
+                                    <h2 class="text-md font-bold text-zinc-100">${acc.name}</h2>
+                                    <span class="text-[10px] tracking-wider uppercase font-bold px-2.5 py-0.5 rounded ${acc.strategyColor}">
+                                        ${acc.strategy}
+                                    </span>
+                                </div>
+
+                                <div class="flex justify-between items-baseline mb-2">
+                                    <span class="text-xs text-zinc-400">Current balance</span>
+                                    <span class="text-lg font-bold text-zinc-100 font-mono">LKR ${dynamicBalance.toLocaleString()}</span>
+                                </div>
+
+                                <div class="mb-6">
+                                    <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+                                        <div class="bg-zinc-600 h-full transition-all duration-500" style="width: ${paidPercentage}%"></div>
+                                    </div>
+                                    <span class="text-[11px] text-zinc-500 mt-1 block">${paidPercentage.toFixed(0)}% cleared</span>
+                                </div>
+
+                                <div class="border-t border-zinc-800/80 pt-4">
+                                    <h4 class="text-xs font-semibold text-zinc-400 mb-2">Log this month's statement</h4>
+                                    <p class="text-[11px] text-zinc-500 bg-zinc-900/30 p-2.5 rounded border border-zinc-800/40 mb-4 leading-relaxed">
+                                        Enter the <strong class="text-zinc-300">new balance</strong> from your statement + what you paid this month. The tracker works out how much was interest.
+                                    </p>
+                                    
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                                        <div>
+                                            <label class="text-[10px] text-zinc-500 block mb-1">Month</label>
+                                            <input id="month-${acc.id}" type="month" value="${currentMonthStr}" class="w-full text-xs p-2 rounded font-mono">
+                                        </div>
+                                        <div>
+                                            <label class="text-[10px] text-zinc-500 block mb-1">New balance (LKR)</label>
+                                            <input id="newBal-${acc.id}" type="number" placeholder="e.g. 285000" class="w-full text-xs p-2 rounded font-mono">
+                                        </div>
+                                        <div class="flex gap-2 items-center">
+                                            <div class="flex-1">
+                                                <label class="text-[10px] text-zinc-500 block mb-1">Payment made (LKR)</label>
+                                                <input id="payMade-${acc.id}" type="number" placeholder="e.g. 52000" class="w-full text-xs p-2 rounded font-mono">
+                                            </div>
+                                            <button onclick="commitStatement('${acc.id}')" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-100 px-4 py-2 rounded-md text-xs font-bold transition-all border border-zinc-700 h-[34px] self-end">
+                                                + Add
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                ${statementsMarkup}
+                            </div>
+                        `;
+                    });
+
+                    // Render Dashboard Counters
+                    document.getElementById('statRemaining').innerText = `LKR ${totalDebtRemaining.toLocaleString()}`;
+                    document.getElementById('statDrop').innerText = `LKR ${totalActualDrop.toLocaleString()}`;
+                    document.getElementById('statInterest').innerText = `LKR ${totalInterestPaid.toLocaleString()}`;
+                    document.getElementById('statMonths').innerText = distinctMonths.size;
+                };
+            };
+        }
+
+        function commitStatement(accountId) {
+            const newBalInput = document.getElementById(`newBal-${accountId}`);
+            const payMadeInput = document.getElementById(`payMade-${accountId}`);
+            const monthInput = document.getElementById(`month-${accountId}`);
+
+            const newBalance = parseFloat(newBalInput.value);
+            const paymentMade = parseFloat(payMadeInput.value);
+            const selectedMonth = monthInput.value;
+
+            if (isNaN(newBalance) || isNaN(paymentMade) || !selectedMonth) {
+                return alert("Validation Mismatch: Inputs cannot be left empty.");
+            }
+
+            const tx = db.transaction(['accounts', 'statements'], 'readwrite');
+            const accStore = tx.objectStore('accounts');
+            const stateStore = tx.objectStore('statements');
+
+            accStore.get(accountId).onsuccess = (e) => {
+                const account = e.target.result;
+                if (!account) return;
+
+                const previousBalance = account.currentBalance;
+                
+                // Accountancy Reverse-Engineering Logic:
+                const expectedBalanceWithoutInterest = previousBalance - paymentMade;
+                const interestCharged = Math.max(0, newBalance - expectedBalanceWithoutInterest);
+                const balanceDrop = Math.max(0, account.initialBalance - newBalance);
+
+                account.currentBalance = newBalance;
+                accStore.put(account);
+
+                stateStore.add({
+                    accountId,
+                    month: selectedMonth,
+                    newBalance,
+                    paymentMade,
+                    interestCharged,
+                    balanceDrop
+                });
+            };
+
+            tx.oncomplete = () => {
+                newBalInput.value = '';
+                payMadeInput.value = '';
+                renderWorkspace();
+            };
+        }
+
+        function formatMonthLabel(monthString) {
+            const [year, month] = monthString.split('-');
+            const date = new Date(year, parseInt(month) - 1);
+            return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        }
+
+        function exportEngineData() {
+            const dump = {};
+            const tx = db.transaction(['accounts', 'statements'], 'readonly');
+            tx.objectStore('accounts').getAll().onsuccess = e1 => {
+                dump.accounts = e1.target.result;
+                tx.objectStore('statements').getAll().onsuccess = e2 => {
+                    dump.statements = e2.target.result;
+                    const blob = new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' });
+                    const triggerLink = document.createElement('a');
+                    triggerLink.href = URL.createObjectURL(blob);
+                    triggerLink.download = `statement_tracker_dump_${new Date().getTime()}.json`;
+                    triggerLink.click();
+                };
+            };
+        }
+
+        function importEngineData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    const tx = db.transaction(['accounts', 'statements'], 'readwrite');
+                    const accStore = tx.objectStore('accounts');
+                    const stateStore = tx.objectStore('statements');
+
+                    accStore.clear();
+                    stateStore.clear();
+
+                    // --- LEGACY BACKWARD MIGRATION PARSER LAYER ---
+                    if (parsed.debts) {
+                        // Maps historical record fields from your JSON data safely
+                        let mappedHNBBalance = 150000;
+                        let mappedDFCCBalance = 300000;
+                        let aggregatedRepayments = { hnb: 0, dfcc: 0 };
+
+                        parsed.debts.forEach(d => {
+                            const normalizedId = d.name.toLowerCase().includes('hnb') ? 'hnb' : 'dfcc';
+                            if (normalizedId === 'hnb') mappedHNBBalance = d.balance;
+                            if (normalizedId === 'dfcc') mappedDFCCBalance = d.balance;
+                        });
+
+                        // Populate existing transaction histories into the structural view logs
+                        if (parsed.logs) {
+                            parsed.logs.forEach(log => {
+                                const matchedId = log.account.toLowerCase().includes('hnb') ? 'hnb' : 'dfcc';
+                                if (log.type.includes('Repayment') || log.amount < 0) {
+                                    aggregatedRepayments[matchedId] += Math.abs(log.amount);
+                                }
+                            });
+                        }
+
+                        // Save Accounts State mapping data smoothly
+                        accStore.put({
+                            id: 'dfcc',
+                            name: 'DFCC credit card',
+                            limit: 300000,
+                            currentBalance: mappedDFCCBalance,
+                            initialBalance: 300000,
+                            strategy: 'attack first',
+                            strategyColor: 'bg-amber-700/40 text-amber-300 border border-amber-600/30'
+                        });
+
+                        accStore.put({
+                            id: 'hnb',
+                            name: 'HNB credit card',
+                            limit: 150000,
+                            currentBalance: mappedHNBBalance,
+                            initialBalance: 150000,
+                            strategy: 'minimums for now',
+                            strategyColor: 'bg-blue-900/40 text-blue-300 border border-blue-600/30'
+                        });
+
+                        // Translate transaction checkpoints into simulated statements
+                        const activeMonth = new Date().toISOString().slice(0, 7);
+                        if (aggregatedRepayments.dfcc > 0) {
+                            stateStore.add({
+                                accountId: 'dfcc',
+                                month: activeMonth,
+                                newBalance: mappedDFCCBalance,
+                                paymentMade: aggregatedRepayments.dfcc,
+                                interestCharged: 0,
+                                balanceDrop: 300000 - mappedDFCCBalance
+                            });
+                        }
+                        if (aggregatedRepayments.hnb > 0) {
+                            stateStore.add({
+                                accountId: 'hnb',
+                                month: activeMonth,
+                                newBalance: mappedHNBBalance,
+                                paymentMade: aggregatedRepayments.hnb,
+                                interestCharged: 0,
+                                balanceDrop: 150000 - mappedHNBBalance
+                            });
+                        }
+                    } 
+                    // Native parsing layer fallback
+                    else if (parsed.accounts) {
+                        parsed.accounts.forEach(a => accStore.put(a));
+                        if (parsed.statements) parsed.statements.forEach(s => stateStore.add(s));
+                    }
+
+                    tx.oncomplete = () => {
+                        alert("Database State Synchronized Successfully.");
+                        renderWorkspace();
+                    };
+                } catch (err) {
+                    alert("Import Error: Verification parameters broke during verification parse step.");
+                }
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>

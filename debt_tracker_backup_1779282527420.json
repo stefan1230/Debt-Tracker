@@ -1,0 +1,57 @@
+{
+  "debts": [
+    {
+      "name": "HNB",
+      "limit": 150000,
+      "balance": 139175,
+      "apr": 28,
+      "lastUpdated": "2026-05-20T13:03:22.872Z",
+      "id": 1
+    },
+    {
+      "name": "DFCC",
+      "limit": 300000,
+      "balance": 269405,
+      "apr": 28,
+      "lastUpdated": "2026-05-20T13:06:45.451Z",
+      "id": 3
+    }
+  ],
+  "logs": [
+    {
+      "timestamp": "2026-05-20T13:03:22.873Z",
+      "account": "HNB",
+      "type": "Card Linked",
+      "amount": 139175,
+      "id": 1
+    },
+    {
+      "timestamp": "2026-05-20T13:04:20.219Z",
+      "account": "DFCC",
+      "type": "Card Linked",
+      "amount": 26990564,
+      "id": 2
+    },
+    {
+      "timestamp": "2026-05-20T13:04:53.585Z",
+      "account": "DFCC",
+      "type": "Account Terminated",
+      "amount": 0,
+      "id": 3
+    },
+    {
+      "timestamp": "2026-05-20T13:05:19.410Z",
+      "account": "DFCC",
+      "type": "Card Linked",
+      "amount": 269905,
+      "id": 4
+    },
+    {
+      "timestamp": "2026-05-20T13:06:45.451Z",
+      "account": "DFCC",
+      "type": "Cash Repayment Applied",
+      "amount": -500,
+      "id": 5
+    }
+  ]
+}
