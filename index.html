@@ -12,7 +12,7 @@
     <style>
         html, body {
             overflow-x: hidden;
-            overscroll-behavior-y: contain; /* Prevents pull-down refresh on mobile browser views */
+            overscroll-behavior-y: contain;
         }
         body { 
             background-color: #1a1a1a; 
@@ -24,7 +24,6 @@
             user-select: none;
         }
         
-        /* Ensure input fields remain user interactive */
         input, select, textarea {
             -webkit-user-select: text;
             user-select: text;
@@ -34,21 +33,25 @@
         .account-card { background-color: #262626; border: 1px solid #333333; }
         .savings-card { background-color: #1e293b; border: 1px solid #334155; }
         
-        /* Strict mobile font size to stop layout auto-zooming */
         input, select { 
             background-color: #2a2a2a !important; 
             border: 1px solid #444444 !important; 
             color: #ffffff !important; 
             font-size: 16px !important; 
-            height: 42px;
-            width: 100%;
-            box-sizing: border-box;
+            height: 44px;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+            display: block;
         }
         
-        /* Ensure native calendar indicators are touch-triggerable but clean */
         input[type="month"] {
             position: relative;
+            -webkit-appearance: none;
+            appearance: none;
         }
+        
+        /* Tap optimization covering the full component area safely */
         input[type="month"]::-webkit-calendar-picker-indicator {
             position: absolute;
             top: 0;
@@ -59,11 +62,10 @@
             cursor: pointer;
         }
 
-        /* Desktop scales down smoothly for a sleek layout look */
         @media (min-width: 768px) { 
             input, select { 
                 font-size: 13px !important; 
-                height: 36px;
+                height: 38px;
             } 
         }
         
@@ -81,13 +83,13 @@
         <div class="space-y-3">
             <div>
                 <label class="text-[10px] text-zinc-400 font-medium block mb-1">Email Address</label>
-                <input id="loginEmail" type="email" placeholder="you@example.com" class="w-full px-2.5 rounded">
+                <input id="loginEmail" type="email" placeholder="you@example.com" class="w-full px-2.5 rounded-lg">
             </div>
             <div>
                 <label class="text-[10px] text-zinc-400 font-medium block mb-1">Password</label>
-                <input id="loginPassword" type="password" placeholder="••••••••" class="w-full px-2.5 rounded">
+                <input id="loginPassword" type="password" placeholder="••••••••" class="w-full px-2.5 rounded-lg">
             </div>
-            <button onclick="handleCloudAuthentication()" class="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-900 font-bold h-[40px] rounded text-xs transition-colors mt-2 flex items-center justify-center">
+            <button onclick="handleCloudAuthentication()" class="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-900 font-bold h-[42px] rounded-lg text-xs transition-colors mt-2 flex items-center justify-center">
                 Establish Session & Sync
             </button>
             <p id="authError" class="text-rose-400 text-xs text-center hidden mt-2"></p>
@@ -132,7 +134,7 @@
                 <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-zinc-400 mb-2 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-amber-500"></span> Liabilities & Statements
                 </h2>
-                <div id="cardsContainer" class="space-y-6"></div>
+                <div id="cardsContainer" class="space-y-6 w-full max-w-full overflow-hidden"></div>
             </div>
             <div class="space-y-6">
                 <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-zinc-400 mb-2 flex items-center gap-2">
@@ -141,9 +143,9 @@
                 <div class="account-card p-4 rounded-xl space-y-3">
                     <h3 class="text-xs font-semibold text-zinc-300">Initialize Savings Goal</h3>
                     <div class="space-y-2">
-                        <input id="newSaveName" type="text" placeholder="Goal Label (e.g. Emergency Fund)" class="w-full px-2 rounded">
-                        <input id="newSaveTarget" type="number" placeholder="Target Amount (LKR)" class="w-full px-2 rounded">
-                        <button onclick="createNewSavingsGoal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white h-[36px] rounded text-xs font-bold transition-all flex items-center justify-center">Create Goal</button>
+                        <input id="newSaveName" type="text" placeholder="Goal Label (e.g. Emergency Fund)" class="w-full px-3 rounded-lg">
+                        <input id="newSaveTarget" type="number" placeholder="Target Amount (LKR)" class="w-full px-3 rounded-lg">
+                        <button onclick="createNewSavingsGoal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white h-[38px] rounded-lg text-xs font-bold transition-all flex items-center justify-center">Create Goal</button>
                     </div>
                 </div>
                 <div id="savingsContainer" class="space-y-4"></div>
@@ -188,10 +190,10 @@
         const swBlob = new Blob([swPipelineCode], { type: 'application/javascript' });
         const swUrl = URL.createObjectURL(swBlob);
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register(swUrl).catch(err => console.log("PWA local execution bypass context."));
+            navigator.serviceWorker.register(swUrl).catch(err => console.log("PWA execution fallback context."));
         }
 
-        // Supabase Database Parameters
+        // Supabase Core API Database Endpoint Configs
         const SUPABASE_URL = "https://kvzlzxhuufeaibiezytw.supabase.co"; 
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt2emx6eGh1dWZlYWliaWV6eXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNzU4NTcsImV4cCI6MjA5NDg1MTg1N30.dT1quEcbWCBB-oEj_659TBYMssCzA0MVaXdJVetc8Fg";
         
@@ -373,15 +375,15 @@
 
                         let statementsMarkup = `<p class="text-xs text-zinc-500 text-center py-4">No statements logged yet</p>`;
                         if (cardStatements.length > 0) {
-                            statementsMarkup = `<div class="space-y-2 mt-4 max-h-48 overflow-y-auto pr-1 custom-scrollbar">`;
+                            statementsMarkup = `<div class="space-y-2 mt-4 max-h-48 overflow-y-auto pr-1 custom-scrollbar w-full">`;
                             cardStatements.forEach(s => {
                                 statementsMarkup += `
-                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center text-xs bg-zinc-900/40 p-3 rounded-lg border border-zinc-800/60 gap-2">
-                                        <div class="font-medium text-zinc-300">${formatMonthLabel(s.month)}</div>
-                                        <div class="flex flex-wrap gap-x-4 gap-y-1 font-mono justify-between sm:justify-end">
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center text-xs bg-zinc-900/40 p-3 rounded-lg border border-zinc-800/60 gap-2 w-full overflow-hidden">
+                                        <div class="font-medium text-zinc-300 shrink-0">${formatMonthLabel(s.month)}</div>
+                                        <div class="flex flex-row flex-wrap gap-x-3 gap-y-1 font-mono justify-between sm:justify-end text-[11px] sm:text-xs overflow-hidden text-ellipsis whitespace-nowrap">
                                             <span class="text-zinc-400">Paid: <strong class="text-zinc-200">${s.paymentMade.toLocaleString()}</strong></span>
                                             <span class="text-emerald-400">Drop: <strong>${s.balanceDrop.toLocaleString()}</strong></span>
-                                            <span class="text-rose-400">Interest: <strong>${s.interestCharged.toLocaleString()}</strong></span>
+                                            <span class="text-rose-400">Int: <strong>${s.interestCharged.toLocaleString()}</strong></span>
                                         </div>
                                     </div>`;
                             });
@@ -389,7 +391,7 @@
                         }
 
                         container.innerHTML += `
-                            <div class="account-card p-4 sm:p-6 rounded-xl shadow-lg">
+                            <div class="account-card p-4 sm:p-6 rounded-xl shadow-lg w-full max-w-full box-border overflow-hidden">
                                 <div class="flex justify-between items-start mb-4 gap-2">
                                     <h2 class="text-sm sm:text-md font-bold text-zinc-100">${acc.name}</h2>
                                     <span class="text-[9px] tracking-wider uppercase font-bold px-2 py-0.5 rounded shrink-0 whitespace-nowrap ${acc.strategyColor}">
@@ -406,32 +408,32 @@
                                     </div>
                                     <span class="text-[11px] text-zinc-500 mt-1 block">${paidPercentage.toFixed(0)}% cleared</span>
                                 </div>
-                                <div class="border-t border-zinc-800/80 pt-4">
+                                <div class="border-t border-zinc-800/80 pt-4 w-full">
                                     <h4 class="text-xs font-semibold text-zinc-400 mb-3">Log this month's statement</h4>
                                     
-                                    <div class="flex flex-col gap-4 md:grid md:grid-cols-3 md:gap-3 items-end">
-                                        <div class="w-full">
+                                    <div class="flex flex-col gap-4 md:grid md:grid-cols-3 md:gap-3 items-end w-full box-border">
+                                        <div class="w-full box-border">
                                             <label class="text-[11px] text-zinc-400 block mb-1.5 font-medium">Statement Month</label>
-                                            <div class="relative w-full">
-                                                <input id="month-${acc.id}" type="month" value="${currentMonthStr}" class="w-full pl-3 pr-10 rounded-lg font-mono">
-                                                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-300">
+                                            <div class="relative w-full block box-border">
+                                                <input id="month-${acc.id}" type="month" value="${currentMonthStr}" class="w-full pl-3 pr-10 rounded-lg font-mono block box-border">
+                                                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-300 z-10">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                                     </svg>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="w-full">
+                                        <div class="w-full box-border">
                                             <label class="text-[11px] text-zinc-400 block mb-1.5 font-medium">New Statement Balance (LKR)</label>
-                                            <input id="newBal-${acc.id}" type="number" placeholder="e.g. 285000" class="w-full px-3 rounded-lg font-mono">
+                                            <input id="newBal-${acc.id}" type="number" placeholder="e.g. 285000" class="w-full px-3 rounded-lg font-mono block box-border">
                                         </div>
-                                        <div class="w-full">
+                                        <div class="w-full box-border">
                                             <label class="text-[11px] text-zinc-400 block mb-1.5 font-medium">Payment Made (LKR)</label>
-                                            <input id="payMade-${acc.id}" type="number" placeholder="e.g. 52000" class="w-full px-3 rounded-lg font-mono">
+                                            <input id="payMade-${acc.id}" type="number" placeholder="e.g. 52000" class="w-full px-3 rounded-lg font-mono block box-border">
                                         </div>
                                     </div>
                                     
-                                    <button onclick="commitStatement('${acc.id}')" class="w-full md:w-auto bg-zinc-100 hover:bg-zinc-200 text-zinc-900 font-bold h-[42px] md:h-[36px] rounded-lg text-xs transition-colors mt-4 flex items-center justify-center px-6 shadow-md">
+                                    <button onclick="commitStatement('${acc.id}')" class="w-full md:w-auto bg-zinc-100 hover:bg-zinc-200 text-zinc-900 font-bold h-[44px] md:h-[38px] rounded-lg text-xs transition-colors mt-4 flex items-center justify-center px-6 shadow-md">
                                         Confirm & Add Log Entry
                                     </button>
                                 </div>
@@ -449,7 +451,7 @@
                             const savePercent = Math.min(100, Math.max(0, (goal.current / goal.target) * 100));
 
                             savingsContainer.innerHTML += `
-                                <div class="savings-card p-4 rounded-xl shadow-md">
+                                <div class="savings-card p-4 rounded-xl shadow-md w-full">
                                     <div class="flex justify-between items-start mb-1 gap-2">
                                         <h3 class="text-sm font-bold text-slate-200 truncate">${goal.name}</h3>
                                         <button onclick="deleteSavingsGoal(${goal.id})" class="text-[10px] text-slate-500 hover:text-rose-400 transition-colors shrink-0">Delete</button>
@@ -463,12 +465,12 @@
                                         <div class="bg-emerald-500 h-full transition-all duration-500" style="width: ${savePercent}%"></div>
                                     </div>
                                     <div class="flex gap-1.5 items-center pt-2 border-t border-slate-700/40">
-                                        <select id="saveAction-${goal.id}" class="text-[10px] px-1.5 rounded bg-slate-800 max-w-[110px]">
+                                        <select id="saveAction-${goal.id}" class="text-[10px] px-1.5 rounded-lg bg-slate-800 max-w-[110px]">
                                             <option value="add">Deposit (+)</option>
                                             <option value="sub">Withdraw (-)</option>
                                         </select>
-                                        <input id="saveAmt-${goal.id}" type="number" placeholder="Amount" class="w-full text-[10px] px-1.5 rounded font-mono">
-                                        <button onclick="mutateSavingsCapital(${goal.id})" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 h-[38px] sm:h-[34px] rounded text-[10px] font-bold transition-all flex items-center justify-center">Go</button>
+                                        <input id="saveAmt-${goal.id}" type="number" placeholder="Amount" class="w-full text-[10px] px-1.5 rounded-lg font-mono">
+                                        <button onclick="mutateSavingsCapital(${goal.id})" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 h-[38px] sm:h-[34px] rounded-lg text-[10px] font-bold transition-all flex items-center justify-center">Go</button>
                                     </div>
                                 </div>
                             `;
