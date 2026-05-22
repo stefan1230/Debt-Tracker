@@ -1,363 +1,427 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vaultiq</title>
 
-    <title>Vaultiq</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
 
-    <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Cabinet Grotesk', sans-serif;
+    }
 
-    <style>
-        html, body {
-            overflow-x: hidden;
-            overscroll-behavior-y: auto;
-        }
+    body {
+      background: #2f2f34;
+      background-image:
+        radial-gradient(circle at top left, rgba(255,255,255,0.05), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(100,143,191,0.12), transparent 30%);
+      color: white;
+      min-height: 100vh;
+    }
 
-        :root {
-            --bg-primary: #2f2f34;
-            --bg-secondary: #35363a;
-            --card-bg: rgba(255,255,255,0.03);
-            --card-border: rgba(255,255,255,0.06);
-            --text-primary: #ffffff;
-            --text-secondary: #b8bcc8;
-            --accent: #648fbf;
-            --accent-light: #89aee0;
-            --success: #76d6a4;
-            --danger: #ff7b8f;
-        }
+    .glass {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
 
-        body {
-            font-family: 'Cabinet Grotesk', sans-serif;
-            background:
-                radial-gradient(circle at top left, #3c3d42 0%, transparent 30%),
-                radial-gradient(circle at bottom right, #2b2c31 0%, transparent 30%),
-                var(--bg-primary);
-            color: var(--text-primary);
-            -webkit-font-smoothing: antialiased;
-            min-height: 100vh;
-        }
+    .card {
+      border-radius: 28px;
+      transition: all 0.3s ease;
+    }
 
-        .glass-panel,
-        .account-card,
-        .savings-card,
-        .stat-card {
-            background: rgba(255,255,255,0.03);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.08);
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.05),
-                0 10px 40px rgba(0,0,0,0.28);
-        }
+    .card:hover {
+      transform: translateY(-3px);
+    }
 
-        .account-card,
-        .savings-card,
-        .stat-card {
-            border-radius: 28px;
-        }
+    input, select {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: white;
+      border-radius: 18px;
+      padding: 14px 16px;
+      outline: none;
+    }
 
-        .hover-lift {
-            transition: all 0.3s ease;
-        }
+    input::placeholder {
+      color: rgba(255,255,255,0.4);
+    }
 
-        .hover-lift:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.35);
-        }
+    button {
+      transition: all 0.25s ease;
+    }
 
-        input,
-        select {
-            width: 100%;
-            height: 54px;
-            background: rgba(255,255,255,0.04) !important;
-            border: 1px solid rgba(255,255,255,0.08) !important;
-            border-radius: 18px;
-            padding: 0 18px;
-            color: white !important;
-            font-size: 15px !important;
-            outline: none;
-            transition: all 0.25s ease;
-        }
+    button:hover {
+      transform: translateY(-1px);
+    }
 
-        input::placeholder {
-            color: rgba(255,255,255,0.35);
-        }
+    .primary-btn {
+      background: linear-gradient(135deg, #648fbf, #89aee0);
+      border-radius: 18px;
+      color: white;
+      font-weight: 700;
+    }
 
-        input:focus,
-        select:focus {
-            border-color: var(--accent) !important;
-            box-shadow: 0 0 0 4px rgba(100,143,191,0.2);
-        }
+    .secondary-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+    }
 
-        button {
-            transition: all 0.25s ease;
-        }
+    .progress {
+      width: 100%;
+      height: 10px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
 
-        button:hover {
-            transform: translateY(-1px);
-        }
-
-        .primary-btn {
-            background: linear-gradient(135deg, #648fbf, #89aee0);
-            border-radius: 20px;
-            color: white;
-            font-weight: 700;
-            box-shadow: 0 10px 20px rgba(100,143,191,0.25);
-        }
-
-        .secondary-btn {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 18px;
-            color: white;
-        }
-
-        .metric-label {
-            color: #b8bcc8;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.18em;
-            font-weight: 700;
-        }
-
-        .metric-value {
-            font-size: 34px;
-            font-weight: 800;
-            letter-spacing: -0.04em;
-            margin-top: 6px;
-        }
-
-        .progress-track {
-            background: rgba(255,255,255,0.06);
-            height: 10px;
-            border-radius: 999px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            background: linear-gradient(90deg, #648fbf, #89aee0);
-            height: 100%;
-            border-radius: 999px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.12);
-            border-radius: 999px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-    </style>
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #648fbf, #89aee0);
+    }
+  </style>
 </head>
+<body class="p-5 lg:p-10">
 
-<body class="p-4 sm:p-6 lg:p-8">
+<div id="loginView" class="max-w-md mx-auto mt-20 glass card p-8">
+  <h1 class="text-4xl font-extrabold tracking-tight mb-2">Vaultiq</h1>
+  <p class="text-slate-400 mb-8">Premium personal finance workspace</p>
 
-<div id="appContainer" class="max-w-7xl mx-auto">
+  <div class="space-y-4">
+    <input id="email" type="email" placeholder="Email Address">
+    <input id="password" type="password" placeholder="Password">
 
-    <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-5 mb-10">
+    <button onclick="login()" class="primary-btn h-14 w-full">
+      Login
+    </button>
 
-        <div>
-            <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white">
-                Vaultiq
-            </h1>
+    <p id="loginError" class="text-red-400 text-sm"></p>
+  </div>
+</div>
 
-            <p class="text-slate-400 mt-2 text-sm sm:text-base">
-                Smart debt & savings management workspace
-            </p>
+<div id="app" class="hidden max-w-7xl mx-auto">
+
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 mb-10">
+    <div>
+      <h1 class="text-5xl font-extrabold tracking-tight">Vaultiq</h1>
+      <p class="text-slate-400 mt-2">Smart debt & savings management workspace</p>
+    </div>
+
+    <div class="flex gap-3 flex-wrap">
+      <button onclick="syncCloud()" class="primary-btn px-6 h-12">
+        Sync Cloud
+      </button>
+
+      <button onclick="logout()" class="secondary-btn px-6 h-12">
+        Logout
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-10">
+
+    <div class="glass card p-6">
+      <p class="text-slate-400 uppercase text-xs tracking-[0.2em]">Total Debt</p>
+      <h2 id="totalDebt" class="text-4xl font-extrabold mt-3">LKR 0</h2>
+    </div>
+
+    <div class="glass card p-6">
+      <p class="text-slate-400 uppercase text-xs tracking-[0.2em]">Savings</p>
+      <h2 id="totalSavings" class="text-4xl font-extrabold mt-3">LKR 0</h2>
+    </div>
+
+    <div class="glass card p-6">
+      <p class="text-slate-400 uppercase text-xs tracking-[0.2em]">Accounts</p>
+      <h2 id="totalAccounts" class="text-4xl font-extrabold mt-3">0</h2>
+    </div>
+
+    <div class="glass card p-6">
+      <p class="text-slate-400 uppercase text-xs tracking-[0.2em]">Goals</p>
+      <h2 id="totalGoals" class="text-4xl font-extrabold mt-3">0</h2>
+    </div>
+
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+
+    <div class="xl:col-span-2 space-y-8">
+
+      <div class="glass card p-7">
+        <h2 class="text-2xl font-bold mb-6">Add Liability Account</h2>
+
+        <div class="grid md:grid-cols-2 gap-4 mb-5">
+          <input id="accName" placeholder="Account Name">
+          <input id="accLimit" type="number" placeholder="Credit Limit">
+          <input id="accBalance" type="number" placeholder="Current Balance">
+
+          <select id="accStrategy">
+            <option>Attack First</option>
+            <option>Minimums</option>
+            <option>Deferred</option>
+          </select>
         </div>
 
-        <div class="flex gap-3 flex-wrap">
-            <button class="secondary-btn px-5 h-12 text-sm font-semibold">
-                Backup
-            </button>
+        <button onclick="addAccount()" class="primary-btn h-14 px-8">
+          Add Account
+        </button>
+      </div>
 
-            <button class="secondary-btn px-5 h-12 text-sm font-semibold">
-                Restore
-            </button>
-
-            <button class="primary-btn px-6 h-12 text-sm">
-                Sync Cloud
-            </button>
-        </div>
-
-    </header>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-10">
-
-        <div class="stat-card hover-lift p-6">
-            <div class="metric-label">Total Debt</div>
-            <div class="metric-value">LKR 485K</div>
-        </div>
-
-        <div class="stat-card hover-lift p-6">
-            <div class="metric-label">Saved Capital</div>
-            <div class="metric-value">LKR 120K</div>
-        </div>
-
-        <div class="stat-card hover-lift p-6">
-            <div class="metric-label">Interest Paid</div>
-            <div class="metric-value">LKR 58K</div>
-        </div>
-
-        <div class="stat-card hover-lift p-6">
-            <div class="metric-label">Months Tracked</div>
-            <div class="metric-value">18</div>
-        </div>
+      <div id="accountsContainer" class="space-y-6"></div>
 
     </div>
 
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+    <div class="space-y-8">
 
-        <div class="xl:col-span-2 space-y-8">
+      <div class="glass card p-7">
+        <h2 class="text-2xl font-bold mb-6">Savings Goal</h2>
 
-            <div class="account-card hover-lift p-7">
+        <div class="space-y-4">
+          <input id="goalName" placeholder="Goal Name">
+          <input id="goalTarget" type="number" placeholder="Target Amount">
 
-                <div class="flex justify-between items-start mb-8">
-                    <div>
-                        <p class="text-slate-400 uppercase tracking-[0.2em] text-xs font-bold mb-2">
-                            Credit Card
-                        </p>
-
-                        <h2 class="text-3xl font-bold tracking-tight">
-                            HNB Platinum
-                        </h2>
-                    </div>
-
-                    <div class="bg-[#648fbf] text-white px-4 py-2 rounded-2xl text-xs font-bold">
-                        Attack First
-                    </div>
-                </div>
-
-                <div class="mb-6">
-                    <div class="flex justify-between mb-3 text-sm text-slate-400">
-                        <span>Current Balance</span>
-                        <span>LKR 145,000</span>
-                    </div>
-
-                    <div class="progress-track">
-                        <div class="progress-fill" style="width: 62%"></div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <input type="month">
-                    <input type="number" placeholder="New Balance">
-                    <input type="number" placeholder="Payment Made">
-                </div>
-
-                <button class="primary-btn h-14 w-full text-sm">
-                    Add Statement
-                </button>
-
-            </div>
-
-            <div class="account-card hover-lift p-7">
-
-                <div class="flex justify-between items-start mb-8">
-                    <div>
-                        <p class="text-slate-400 uppercase tracking-[0.2em] text-xs font-bold mb-2">
-                            Credit Card
-                        </p>
-
-                        <h2 class="text-3xl font-bold tracking-tight">
-                            DFCC Visa
-                        </h2>
-                    </div>
-
-                    <div class="bg-[#4d5f7a] text-white px-4 py-2 rounded-2xl text-xs font-bold">
-                        Minimums
-                    </div>
-                </div>
-
-                <div class="mb-6">
-                    <div class="flex justify-between mb-3 text-sm text-slate-400">
-                        <span>Current Balance</span>
-                        <span>LKR 92,000</span>
-                    </div>
-
-                    <div class="progress-track">
-                        <div class="progress-fill" style="width: 34%"></div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <input type="month">
-                    <input type="number" placeholder="New Balance">
-                    <input type="number" placeholder="Payment Made">
-                </div>
-
-                <button class="primary-btn h-14 w-full text-sm">
-                    Add Statement
-                </button>
-
-            </div>
-
+          <button onclick="addGoal()" class="primary-btn w-full h-14">
+            Create Goal
+          </button>
         </div>
+      </div>
 
-        <div class="space-y-8">
-
-            <div class="savings-card hover-lift p-7">
-
-                <h2 class="text-2xl font-bold tracking-tight mb-6">
-                    Savings Goal
-                </h2>
-
-                <input type="text" placeholder="Goal Name" class="mb-4">
-                <input type="number" placeholder="Target Amount" class="mb-5">
-
-                <button class="primary-btn w-full h-14 text-sm">
-                    Create Goal
-                </button>
-
-            </div>
-
-            <div class="savings-card hover-lift p-7">
-
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold tracking-tight">
-                        Emergency Fund
-                    </h2>
-
-                    <span class="text-sm text-slate-400">
-                        72%
-                    </span>
-                </div>
-
-                <div class="progress-track mb-5">
-                    <div class="progress-fill" style="width:72%"></div>
-                </div>
-
-                <div class="flex justify-between text-sm mb-6">
-                    <span class="text-slate-400">Current</span>
-                    <span>LKR 360,000</span>
-                </div>
-
-                <div class="grid grid-cols-[1fr_auto] gap-3">
-                    <input type="number" placeholder="Amount">
-
-                    <button class="primary-btn px-6 h-14 text-sm">
-                        Add
-                    </button>
-                </div>
-
-            </div>
-
-        </div>
+      <div id="goalsContainer" class="space-y-6"></div>
 
     </div>
+
+  </div>
 
 </div>
+
+<script>
+
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+
+let state = {
+  accounts: [],
+  goals: []
+};
+
+async function login() {
+
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    document.getElementById('loginError').innerText = error.message;
+    return;
+  }
+
+  currentUser = data.user;
+
+  document.getElementById('loginView').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+
+  await loadCloud();
+
+  render();
+}
+
+async function logout() {
+  await supabaseClient.auth.signOut();
+  location.reload();
+}
+
+function currency(value) {
+  return 'LKR ' + Number(value).toLocaleString();
+}
+
+function addAccount() {
+
+  const account = {
+    id: Date.now(),
+    name: document.getElementById('accName').value,
+    limit: Number(document.getElementById('accLimit').value),
+    balance: Number(document.getElementById('accBalance').value),
+    strategy: document.getElementById('accStrategy').value
+  };
+
+  state.accounts.push(account);
+
+  render();
+  syncCloud();
+}
+
+function addGoal() {
+
+  const goal = {
+    id: Date.now(),
+    name: document.getElementById('goalName').value,
+    target: Number(document.getElementById('goalTarget').value),
+    current: 0
+  };
+
+  state.goals.push(goal);
+
+  render();
+  syncCloud();
+}
+
+function depositGoal(id) {
+
+  const amount = Number(prompt('Deposit amount'));
+
+  if (!amount) return;
+
+  const goal = state.goals.find(g => g.id === id);
+
+  goal.current += amount;
+
+  render();
+  syncCloud();
+}
+
+function render() {
+
+  const accountsContainer = document.getElementById('accountsContainer');
+  const goalsContainer = document.getElementById('goalsContainer');
+
+  accountsContainer.innerHTML = '';
+  goalsContainer.innerHTML = '';
+
+  let totalDebt = 0;
+  let totalSavings = 0;
+
+  state.accounts.forEach(account => {
+
+    totalDebt += account.balance;
+
+    const percent = ((account.limit - account.balance) / account.limit) * 100;
+
+    accountsContainer.innerHTML += `
+      <div class="glass card p-7">
+
+        <div class="flex justify-between items-start mb-6 gap-5">
+          <div>
+            <p class="text-slate-400 uppercase text-xs tracking-[0.2em] mb-2">
+              Liability Account
+            </p>
+
+            <h2 class="text-3xl font-bold tracking-tight">
+              ${account.name}
+            </h2>
+          </div>
+
+          <div class="bg-[#648fbf] px-4 py-2 rounded-2xl text-xs font-bold">
+            ${account.strategy}
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <div class="flex justify-between mb-3 text-sm text-slate-400">
+            <span>Current Balance</span>
+            <span>${currency(account.balance)}</span>
+          </div>
+
+          <div class="progress">
+            <div class="progress-fill" style="width:${percent}%"></div>
+          </div>
+        </div>
+
+      </div>
+    `;
+  });
+
+  state.goals.forEach(goal => {
+
+    totalSavings += goal.current;
+
+    const percent = (goal.current / goal.target) * 100;
+
+    goalsContainer.innerHTML += `
+
+      <div class="glass card p-7">
+
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-bold">
+            ${goal.name}
+          </h2>
+
+          <span class="text-slate-400">
+            ${Math.floor(percent)}%
+          </span>
+        </div>
+
+        <div class="progress mb-5">
+          <div class="progress-fill" style="width:${percent}%"></div>
+        </div>
+
+        <div class="flex justify-between text-sm mb-6">
+          <span class="text-slate-400">Current</span>
+          <span>${currency(goal.current)}</span>
+        </div>
+
+        <button onclick="depositGoal(${goal.id})" class="primary-btn h-12 px-6 w-full">
+          Deposit
+        </button>
+
+      </div>
+
+    `;
+  });
+
+  document.getElementById('totalDebt').innerText = currency(totalDebt);
+  document.getElementById('totalSavings').innerText = currency(totalSavings);
+  document.getElementById('totalAccounts').innerText = state.accounts.length;
+  document.getElementById('totalGoals').innerText = state.goals.length;
+}
+
+async function syncCloud() {
+
+  if (!currentUser) return;
+
+  const payload = {
+    user_id: currentUser.id,
+    state_data: state,
+    updated_at: new Date().toISOString()
+  };
+
+  await supabaseClient
+    .from('vaultiq_data')
+    .upsert(payload, {
+      onConflict: 'user_id'
+    });
+}
+
+async function loadCloud() {
+
+  if (!currentUser) return;
+
+  const { data } = await supabaseClient
+    .from('vaultiq_data')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .single();
+
+  if (data?.state_data) {
+    state = data.state_data;
+  }
+}
+
+</script>
 
 </body>
 </html>
