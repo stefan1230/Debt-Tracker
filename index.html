@@ -1,427 +1,788 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vaultiq</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Financial Portfolio Workspace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        html, body {
+            overflow-x: hidden;
+            overscroll-behavior-y: auto;
+        }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            -webkit-tap-highlight-color: transparent;
+            touch-action: auto;
+            -webkit-user-select: none;
+            user-select: none;
+            transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        input, select, textarea {
+            -webkit-user-select: text;
+            user-select: text;
+        }
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        /* 🌈 VIBRANT LIGHT THEME */
+        body.light-theme { background-color: #f1f5f9; color: #0f172a; }
+        body.light-theme .stat-debt { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1px solid #fde68a; }
+        body.light-theme .stat-saved { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid #bbf7d0; }
+        body.light-theme .stat-interest { background: linear-gradient(135deg, #fff5f5 0%, #ffe3e3 100%); border: 1px solid #ffc9c9; }
+        body.light-theme .stat-months { background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%); border: 1px solid #c7d2fe; }
+        
+        body.light-theme .account-card { background-color: #ffffff; border: 1px solid #e2e8f0; border-top: 4px solid #6366f1; box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.05); }
+        body.light-theme .savings-card { background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); border: 1px solid #bbf7d0; border-left: 4px solid #10b981; }
+        
+        body.light-theme input, body.light-theme select { 
+            background-color: #ffffff !important; 
+            border: 1px solid #cbd5e1 !important; 
+            color: #0f172a !important; 
+        }
+        body.light-theme input::placeholder { color: #94a3b8 !important; }
+        body.light-theme header { border-color: #cbd5e1; }
+        body.light-theme .custom-scrollbar::-webkit-scrollbar-track { background: #e2e8f0; }
+        body.light-theme .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; }
 
-  <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+        /* 🌌 RICH DARK THEME */
+        body.dark-theme { background-color: #0b0f19; color: #f1f5f9; }
+        body.dark-theme .stat-debt { background: linear-gradient(135deg, #1e1b4b 0%, #2e1065 100%); border: 1px solid #4c1d95; }
+        body.dark-theme .stat-saved { background: linear-gradient(135deg, #022c22 0%, #064e3b 100%); border: 1px solid #065f46; }
+        body.dark-theme .stat-interest { background: linear-gradient(135deg, #4c0519 0%, #881337 100%); border: 1px solid #9f1239; }
+        body.dark-theme .stat-months { background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%); border: 1px solid #1e40af; }
+        
+        body.dark-theme .account-card { background-color: #111827; border: 1px solid #1f2937; border-top: 4px solid #818cf8; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3); }
+        body.dark-theme .savings-card { background: linear-gradient(135deg, #0f172a 0%, #111827 100%); border: 1px solid #1e293b; border-left: 4px solid #34d399; }
+        
+        body.dark-theme input, body.dark-theme select { 
+            background-color: #1f2937 !important; 
+            border: 1px solid #374151 !important; 
+            color: #ffffff !important; 
+        }
+        body.dark-theme input::placeholder { color: #6b7280 !important; }
+        body.dark-theme header { border-color: #1f2937; }
+        body.dark-theme .custom-scrollbar::-webkit-scrollbar-track { background: #111827; }
+        body.dark-theme .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; }
 
-  <style>
-    * {
-      font-family: 'Cabinet Grotesk', sans-serif;
-    }
+        input, select { 
+            font-size: 16px !important; 
+            height: 44px;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+            display: block;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        input[type="month"] {
+            position: relative;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        input[type="month"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
 
-    body {
-      background: #2f2f34;
-      background-image:
-        radial-gradient(circle at top left, rgba(255,255,255,0.05), transparent 30%),
-        radial-gradient(circle at bottom right, rgba(100,143,191,0.12), transparent 30%);
-      color: white;
-      min-height: 100vh;
-    }
-
-    .glass {
-      background: rgba(255,255,255,0.04);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-    }
-
-    .card {
-      border-radius: 28px;
-      transition: all 0.3s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-3px);
-    }
-
-    input, select {
-      width: 100%;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: white;
-      border-radius: 18px;
-      padding: 14px 16px;
-      outline: none;
-    }
-
-    input::placeholder {
-      color: rgba(255,255,255,0.4);
-    }
-
-    button {
-      transition: all 0.25s ease;
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-    }
-
-    .primary-btn {
-      background: linear-gradient(135deg, #648fbf, #89aee0);
-      border-radius: 18px;
-      color: white;
-      font-weight: 700;
-    }
-
-    .secondary-btn {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 18px;
-    }
-
-    .progress {
-      width: 100%;
-      height: 10px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #648fbf, #89aee0);
-    }
-  </style>
+        @media (min-width: 768px) { 
+            input, select { 
+                font-size: 13px !important; 
+                height: 38px;
+            } 
+        }
+        
+        body.light-theme input:focus, body.light-theme select:focus { outline: none !important; border-color: #6366f1 !important; box-shadow: 0 0 0 2px rgb(99 102 241 / 0.2); }
+        body.dark-theme input:focus, body.dark-theme select:focus { outline: none !important; border-color: #818cf8 !important; box-shadow: 0 0 0 2px rgb(129 140 248 / 0.2); }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { border-radius: 2px; }
+    </style>
 </head>
-<body class="p-5 lg:p-10">
+<body class="dark-theme p-3 sm:p-4 md:p-6 lg:p-8 min-h-screen flex items-start justify-center">
 
-<div id="loginView" class="max-w-md mx-auto mt-20 glass card p-8">
-  <h1 class="text-4xl font-extrabold tracking-tight mb-2">Vaultiq</h1>
-  <p class="text-slate-400 mb-8">Premium personal finance workspace</p>
-
-  <div class="space-y-4">
-    <input id="email" type="email" placeholder="Email Address">
-    <input id="password" type="password" placeholder="Password">
-
-    <button onclick="login()" class="primary-btn h-14 w-full">
-      Login
-    </button>
-
-    <p id="loginError" class="text-red-400 text-sm"></p>
-  </div>
-</div>
-
-<div id="app" class="hidden max-w-7xl mx-auto">
-
-  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 mb-10">
-    <div>
-      <h1 class="text-5xl font-extrabold tracking-tight">Vaultiq</h1>
-      <p class="text-slate-400 mt-2">Smart debt & savings management workspace</p>
+    <div id="authContainer" class="w-full max-w-sm account-card p-5 sm:p-6 rounded-xl self-center">
+        <h2 class="text-xl font-bold mb-1 tracking-tight">Private Financial Gateway</h2>
+        <p class="text-xs text-slate-500 dark:text-gray-400 mb-4">Provide parameters to sync secure device storage engine cloud state.</p>
+        <div class="space-y-3">
+            <div>
+                <label class="text-[10px] text-slate-600 dark:text-gray-300 font-semibold uppercase block mb-1">Email Address</label>
+                <input id="loginEmail" type="email" placeholder="you@example.com" class="w-full px-2.5 rounded-lg">
+            </div>
+            <div>
+                <label class="text-[10px] text-slate-600 dark:text-gray-300 font-semibold uppercase block mb-1">Password</label>
+                <input id="loginPassword" type="password" placeholder="••••••••" class="w-full px-2.5 rounded-lg">
+            </div>
+            <button onclick="handleCloudAuthentication()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold h-[42px] rounded-lg text-xs transition-colors mt-2 flex items-center justify-center shadow-md">
+                Establish Session & Sync
+            </button>
+            <p id="authError" class="text-rose-500 text-xs text-center hidden mt-2"></p>
+        </div>
     </div>
 
-    <div class="flex gap-3 flex-wrap">
-      <button onclick="syncCloud()" class="primary-btn px-6 h-12">
-        Sync Cloud
-      </button>
+    <div id="appContainer" class="w-full max-w-[1400px] mx-auto hidden transition-all duration-300">
+        <header class="flex flex-col gap-4 sm:gap-2 md:flex-row md:justify-between md:items-center mb-6 border-b pb-4">
+            <div>
+                <h1 class="text-lg sm:text-2xl font-bold tracking-tight bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">Cloud Connected Ledger Workspace</h1>
+                <p id="syncBadge" class="text-[11px] sm:text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">● Connected to Free Supabase Cloud Instance</p>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="toggleThemeConfig()" class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-3 h-[36px] rounded-lg text-[11px] sm:text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm hover:brightness-110">
+                    <span id="themeIcon">🌙</span> <span id="themeText">Dark Mode</span>
+                </button>
+                
+                <div class="grid grid-cols-3 gap-1.5 sm:flex sm:gap-2">
+                    <button onclick="handleSessionSignOut()" class="bg-rose-500 hover:bg-rose-600 text-white px-2 sm:px-3 h-[36px] rounded-lg text-[11px] sm:text-xs font-semibold transition-all text-center flex items-center justify-center shadow-sm">Sign Out</button>
+                    <button onclick="exportEngineData()" class="bg-slate-200 dark:bg-gray-800 hover:bg-slate-300 dark:hover:bg-gray-700 text-slate-800 dark:text-gray-200 px-2 sm:px-3 h-[36px] rounded-lg text-[11px] sm:text-xs font-medium transition-all text-center flex items-center justify-center border border-slate-300 dark:border-gray-700">Backup JSON</button>
+                    <input type="file" id="importFile" class="hidden" onchange="importEngineData(event)">
+                    <button onclick="document.getElementById('importFile').click()" class="bg-slate-200 dark:bg-gray-800 hover:bg-slate-300 dark:hover:bg-gray-700 text-slate-800 dark:text-gray-200 px-2 sm:px-3 h-[36px] rounded-lg text-[11px] sm:text-xs font-medium transition-all text-center flex items-center justify-center border border-slate-300 dark:border-gray-700">Restore JSON</button>
+                </div>
+            </div>
+        </header>
 
-      <button onclick="logout()" class="secondary-btn px-6 h-12">
-        Logout
-      </button>
-    </div>
-  </div>
-
-  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-10">
-
-    <div class="glass card p-6">
-      <p class="text-slate-400 uppercase text-xs tracking-[0.2em]">Total Debt</p>
-      <h2 id="totalDebt" class="text-4xl font-extrabold mt-3">LKR 0</h2>
-    </div>
-
-    <div class="glass card p-6">
-      <p class="text-slate-400 uppercase text-xs tracking-[0.2em]">Savings</p>
-      <h2 id="totalSavings" class="text-4xl font-extrabold mt-3">LKR 0</h2>
-    </div>
-
-    <div class="glass card p-6">
-      <p class="text-slate-400 uppercase text-xs tracking-[0.2em]">Accounts</p>
-      <h2 id="totalAccounts" class="text-4xl font-extrabold mt-3">0</h2>
-    </div>
-
-    <div class="glass card p-6">
-      <p class="text-slate-400 uppercase text-xs tracking-[0.2em]">Goals</p>
-      <h2 id="totalGoals" class="text-4xl font-extrabold mt-3">0</h2>
-    </div>
-
-  </div>
-
-  <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-
-    <div class="xl:col-span-2 space-y-8">
-
-      <div class="glass card p-7">
-        <h2 class="text-2xl font-bold mb-6">Add Liability Account</h2>
-
-        <div class="grid md:grid-cols-2 gap-4 mb-5">
-          <input id="accName" placeholder="Account Name">
-          <input id="accLimit" type="number" placeholder="Credit Limit">
-          <input id="accBalance" type="number" placeholder="Current Balance">
-
-          <select id="accStrategy">
-            <option>Attack First</option>
-            <option>Minimums</option>
-            <option>Deferred</option>
-          </select>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div class="stat-debt p-3 sm:p-5 rounded-xl transition-all">
+                <p class="text-[11px] sm:text-xs text-amber-800 dark:text-amber-300 font-semibold uppercase tracking-wider">Total debt remaining</p>
+                <p id="statRemaining" class="text-lg sm:text-2xl font-bold text-amber-700 dark:text-amber-400 mt-1 truncate font-mono">LKR 0</p>
+            </div>
+            <div class="stat-saved p-3 sm:p-5 rounded-xl transition-all">
+                <p class="text-[11px] sm:text-xs text-emerald-800 dark:text-emerald-300 font-semibold uppercase tracking-wider">Total capital saved</p>
+                <p id="statSaved" class="text-lg sm:text-2xl font-bold text-emerald-700 dark:text-emerald-400 mt-1 truncate font-mono">LKR 0</p>
+            </div>
+            <div class="stat-interest p-3 sm:p-5 rounded-xl transition-all">
+                <p class="text-[11px] sm:text-xs text-rose-800 dark:text-rose-300 font-semibold uppercase tracking-wider">Interest paid (est.)</p>
+                <p id="statInterest" class="text-lg sm:text-2xl font-bold text-rose-700 dark:text-rose-400 mt-1 truncate font-mono">LKR 0</p>
+            </div>
+            <div class="stat-months p-3 sm:p-5 rounded-xl transition-all">
+                <p class="text-[11px] sm:text-xs text-indigo-800 dark:text-indigo-300 font-semibold uppercase tracking-wider">Months tracked</p>
+                <p id="statMonths" class="text-lg sm:text-2xl font-bold text-indigo-700 dark:text-indigo-400 mt-1 font-mono">0</p>
+            </div>
         </div>
 
-        <button onclick="addAccount()" class="primary-btn h-14 px-8">
-          Add Account
-        </button>
-      </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div class="lg:col-span-2 space-y-6">
+                <div class="account-card p-4 sm:p-5 rounded-xl space-y-4">
+                    <h3 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span> Register Liability Account
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <input id="newAccName" type="text" placeholder="Account Name (e.g. DFCC Gold Card)" class="w-full px-3 rounded-lg">
+                        <input id="newAccLimit" type="number" placeholder="Credit Limit / Principal (LKR)" class="w-full px-3 rounded-lg">
+                        <input id="newAccBalance" type="number" placeholder="Current Outstanding Balance (LKR)" class="w-full px-3 rounded-lg">
+                        <select id="newAccStrategy" class="w-full px-3 rounded-lg font-medium">
+                            <option value="attack first">🔥 Aggressive Paydown (Attack First)</option>
+                            <option value="minimums for now">🛡️ Holding Pattern (Minimums For Now)</option>
+                            <option value="deferred interest">⏳ Deferred Balance Strategy</option>
+                        </select>
+                    </div>
+                    <button onclick="createNewLiabilityAccount()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white h-[40px] rounded-lg text-xs font-bold transition-all flex items-center justify-center shadow-md">Initialize Account Entry</button>
+                </div>
 
-      <div id="accountsContainer" class="space-y-6"></div>
-
+                <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400 mb-2 flex items-center gap-2 pt-2">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span> Liabilities & Statements
+                </h2>
+                <div id="cardsContainer" class="space-y-6 w-full max-w-full overflow-hidden"></div>
+            </div>
+            
+            <div class="space-y-6">
+                <div class="account-card p-4 sm:p-5 rounded-xl space-y-4" style="border-top-color: #10b981;">
+                    <h3 class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Initialize Savings Goal
+                    </h3>
+                    <div class="space-y-2.5">
+                        <input id="newSaveName" type="text" placeholder="Goal Label (e.g. Emergency Fund)" class="w-full px-3 rounded-lg">
+                        <input id="newSaveTarget" type="number" placeholder="Target Amount (LKR)" class="w-full px-3 rounded-lg">
+                        <button onclick="createNewSavingsGoal()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white h-[40px] rounded-lg text-xs font-bold transition-all flex items-center justify-center shadow-md">Create Goal</button>
+                    </div>
+                </div>
+                
+                <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400 mb-2 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Savings & Capital Goals
+                </h2>
+                <div id="savingsContainer" class="space-y-4"></div>
+            </div>
+        </div>
     </div>
 
-    <div class="space-y-8">
-
-      <div class="glass card p-7">
-        <h2 class="text-2xl font-bold mb-6">Savings Goal</h2>
-
-        <div class="space-y-4">
-          <input id="goalName" placeholder="Goal Name">
-          <input id="goalTarget" type="number" placeholder="Target Amount">
-
-          <button onclick="addGoal()" class="primary-btn w-full h-14">
-            Create Goal
-          </button>
-        </div>
-      </div>
-
-      <div id="goalsContainer" class="space-y-6"></div>
-
-    </div>
-
-  </div>
-
-</div>
-
-<script>
-
-const SUPABASE_URL = 'https://kvzlzxhuufeaibiezytw.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt2emx6eGh1dWZlYWliaWV6eXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNzU4NTcsImV4cCI6MjA5NDg1MTg1N30.dT1quEcbWCBB-oEj_659TBYMssCzA0MVaXdJVetc8Fg';
-
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-let currentUser = null;
-
-let state = {
-  accounts: [],
-  goals: []
-};
-
-async function login() {
-
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    document.getElementById('loginError').innerText = error.message;
-    return;
-  }
-
-  currentUser = data.user;
-
-  document.getElementById('loginView').classList.add('hidden');
-  document.getElementById('app').classList.remove('hidden');
-
-  await loadCloud();
-
-  render();
-}
-
-async function logout() {
-  await supabaseClient.auth.signOut();
-  location.reload();
-}
-
-function currency(value) {
-  return 'LKR ' + Number(value).toLocaleString();
-}
-
-function addAccount() {
-
-  const account = {
-    id: Date.now(),
-    name: document.getElementById('accName').value,
-    limit: Number(document.getElementById('accLimit').value),
-    balance: Number(document.getElementById('accBalance').value),
-    strategy: document.getElementById('accStrategy').value
-  };
-
-  state.accounts.push(account);
-
-  render();
-  syncCloud();
-}
-
-function addGoal() {
-
-  const goal = {
-    id: Date.now(),
-    name: document.getElementById('goalName').value,
-    target: Number(document.getElementById('goalTarget').value),
-    current: 0
-  };
-
-  state.goals.push(goal);
-
-  render();
-  syncCloud();
-}
-
-function depositGoal(id) {
-
-  const amount = Number(prompt('Deposit amount'));
-
-  if (!amount) return;
-
-  const goal = state.goals.find(g => g.id === id);
-
-  goal.current += amount;
-
-  render();
-  syncCloud();
-}
-
-function render() {
-
-  const accountsContainer = document.getElementById('accountsContainer');
-  const goalsContainer = document.getElementById('goalsContainer');
-
-  accountsContainer.innerHTML = '';
-  goalsContainer.innerHTML = '';
-
-  let totalDebt = 0;
-  let totalSavings = 0;
-
-  state.accounts.forEach(account => {
-
-    totalDebt += account.balance;
-
-    const percent = ((account.limit - account.balance) / account.limit) * 100;
-
-    accountsContainer.innerHTML += `
-      <div class="glass card p-7">
-
-        <div class="flex justify-between items-start mb-6 gap-5">
-          <div>
-            <p class="text-slate-400 uppercase text-xs tracking-[0.2em] mb-2">
-              Liability Account
-            </p>
-
-            <h2 class="text-3xl font-bold tracking-tight">
-              ${account.name}
-            </h2>
-          </div>
-
-          <div class="bg-[#648fbf] px-4 py-2 rounded-2xl text-xs font-bold">
-            ${account.strategy}
-          </div>
-        </div>
-
-        <div class="mb-6">
-          <div class="flex justify-between mb-3 text-sm text-slate-400">
-            <span>Current Balance</span>
-            <span>${currency(account.balance)}</span>
-          </div>
-
-          <div class="progress">
-            <div class="progress-fill" style="width:${percent}%"></div>
-          </div>
-        </div>
-
-      </div>
-    `;
-  });
-
-  state.goals.forEach(goal => {
-
-    totalSavings += goal.current;
-
-    const percent = (goal.current / goal.target) * 100;
-
-    goalsContainer.innerHTML += `
-
-      <div class="glass card p-7">
-
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-2xl font-bold">
-            ${goal.name}
-          </h2>
-
-          <span class="text-slate-400">
-            ${Math.floor(percent)}%
-          </span>
-        </div>
-
-        <div class="progress mb-5">
-          <div class="progress-fill" style="width:${percent}%"></div>
-        </div>
-
-        <div class="flex justify-between text-sm mb-6">
-          <span class="text-slate-400">Current</span>
-          <span>${currency(goal.current)}</span>
-        </div>
-
-        <button onclick="depositGoal(${goal.id})" class="primary-btn h-12 px-6 w-full">
-          Deposit
-        </button>
-
-      </div>
-
-    `;
-  });
-
-  document.getElementById('totalDebt').innerText = currency(totalDebt);
-  document.getElementById('totalSavings').innerText = currency(totalSavings);
-  document.getElementById('totalAccounts').innerText = state.accounts.length;
-  document.getElementById('totalGoals').innerText = state.goals.length;
-}
-
-async function syncCloud() {
-
-  if (!currentUser) return;
-
-  const payload = {
-    user_id: currentUser.id,
-    state_data: state,
-    updated_at: new Date().toISOString()
-  };
-
-  await supabaseClient
-    .from('vaultiq_data')
-    .upsert(payload, {
-      onConflict: 'user_id'
-    });
-}
-
-async function loadCloud() {
-
-  if (!currentUser) return;
-
-  const { data } = await supabaseClient
-    .from('vaultiq_data')
-    .select('*')
-    .eq('user_id', currentUser.id)
-    .single();
-
-  if (data?.state_data) {
-    state = data.state_data;
-  }
-}
-
-</script>
-
+    <script>
+        if (localStorage.getItem('themePreference') === 'light' || (!('themePreference' in localStorage) && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+            document.body.className = "light-theme";
+            updateThemeInterfaceLabels("light");
+        } else {
+            document.body.className = "dark-theme";
+            updateThemeInterfaceLabels("dark");
+        }
+
+        function toggleThemeConfig() {
+            if (document.body.classList.contains("dark-theme")) {
+                document.body.className = "light-theme";
+                localStorage.setItem('themePreference', 'light');
+                updateThemeInterfaceLabels("light");
+            } else {
+                document.body.className = "dark-theme";
+                localStorage.setItem('themePreference', 'dark');
+                updateThemeInterfaceLabels("dark");
+            }
+            renderWorkspace();
+        }
+
+        function updateThemeInterfaceLabels(currentTheme) {
+            const icon = document.getElementById("themeIcon");
+            const text = document.getElementById("themeText");
+            if (currentTheme === "light") {
+                icon.innerText = "☀️";
+                text.innerText = "Light Mode";
+            } else {
+                icon.innerText = "🌙";
+                text.innerText = "Dark Mode";
+            }
+        }
+
+        // PWA Manifest Configuration
+        const pwaManifestObj = {
+            name: "Financial Portfolio Ledger",
+            short_name: "Ledger",
+            description: "Cloud Connected Personal Financial Workspace Engine",
+            start_url: window.location.href,
+            display: "standalone",
+            background_color: "#0b0f19",
+            theme_color: "#0b0f19",
+            orientation: "portrait",
+            icons: [{
+                src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%236366f1'><circle cx='256' cy='256' r='240' fill='%23111827' stroke='%23374151' stroke-width='10'/><path d='M256 120v272M180 196h152M196 316h120' stroke='%236366f1' stroke-width='36' stroke-linecap='round'/></svg>",
+                sizes: "512x512",
+                type: "image/svg+xml"
+            }]
+        };
+        const manifestBlob = new Blob([JSON.stringify(pwaManifestObj)], { type: 'application/manifest+json' });
+        const manifestUrl = URL.createObjectURL(manifestBlob);
+        const linkManifestTag = document.createElement('link');
+        linkManifestTag.rel = 'manifest';
+        linkManifestTag.href = manifestUrl;
+        document.head.appendChild(linkManifestTag);
+
+        const swPipelineCode = `
+            const CACHE_NAME = 'ledger-runtime-cache';
+            self.addEventListener('install', (e) => {
+                e.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(['${window.location.href}'])));
+            });
+            self.addEventListener('fetch', (e) => {
+                e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
+            });
+        `;
+        const swBlob = new Blob([swPipelineCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(swBlob);
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register(swUrl).catch(err => console.log("PWA runtime fallback."));
+        }
+
+        const SUPABASE_URL = "https://kvzlzxhuufeaibiezytw.supabase.co"; 
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt2emx6eGh1dWZlYWliaWV6eXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNzU4NTcsImV4cCI6MjA5NDg1MTg1N30.dT1quEcbWCBB-oEj_659TBYMssCzA0MVaXdJVetc8Fg";
+        
+        let supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); 
+        let activeUserSession = null;
+        const DB_NAME = 'IntegratedPortfolioTrackerDB';
+        const DB_VERSION = 1;
+        let db;
+
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = e => {
+            db = e.target.result;
+            db.createObjectStore('accounts', { keyPath: 'id' });
+            db.createObjectStore('statements', { keyPath: 'id', autoIncrement: true });
+            db.createObjectStore('savings', { keyPath: 'id', autoIncrement: true });
+        };
+        request.onsuccess = e => { 
+            db = e.target.result; 
+            evaluateUserAuthenticationState();
+        };
+
+        async function evaluateUserAuthenticationState() {
+            if (!supabaseClient) {
+                document.getElementById('authContainer').classList.add('hidden');
+                document.getElementById('appContainer').classList.remove('hidden');
+                document.getElementById('syncBadge').innerText = "● Running offline local storage mode";
+                document.getElementById('syncBadge').className = "text-xs text-amber-500";
+                renderWorkspace();
+                return;
+            }
+
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                activeUserSession = session.user;
+                transitionUIToApplicationView();
+            }
+        }
+
+        async function handleCloudAuthentication() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errLabel = document.getElementById('authError');
+
+            if (!supabaseClient) return alert("System Setup Error: Cloud configurations missing.");
+
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) {
+                errLabel.innerText = error.message;
+                errLabel.classList.remove('hidden');
+            } else {
+                activeUserSession = data.user;
+                errLabel.classList.add('hidden');
+                transitionUIToApplicationView();
+            }
+        }
+
+        async function transitionUIToApplicationView() {
+            document.getElementById('authContainer').classList.add('hidden');
+            document.getElementById('appContainer').classList.remove('hidden');
+            
+            await synchronizeStorageStateFromCloudCloud();
+            renderWorkspace();
+        }
+
+        async function handleSessionSignOut() {
+            if (supabaseClient) await supabaseClient.auth.signOut();
+            window.location.reload();
+        }
+
+        async function forceCloudStateBackupSynchronization() {
+            if (!supabaseClient || !activeUserSession) return;
+            document.getElementById('syncBadge').innerText = "🔄 Uploading real-time updates...";
+            document.getElementById('syncBadge').className = "text-xs text-blue-500 dark:text-blue-400 font-semibold";
+
+            const tx = db.transaction(['accounts', 'statements', 'savings'], 'readonly');
+            const dataDump = {};
+
+            tx.objectStore('accounts').getAll().onsuccess = e1 => {
+                dataDump.accounts = e1.target.result;
+                tx.objectStore('statements').getAll().onsuccess = e2 => {
+                    dataDump.statements = e2.target.result;
+                    tx.objectStore('savings').getAll().onsuccess = e3 => {
+                        dataDump.savings = e3.target.result;
+                        
+                        supabaseClient.from('user_financial_states').upsert({
+                            user_id: activeUserSession.id,
+                            payload: dataDump,
+                            updated_at: new Date().toISOString()
+                        }).then(({ error }) => {
+                            if (!error) {
+                                document.getElementById('syncBadge').innerText = "● Cloud State Synced Seamlessly";
+                                document.getElementById('syncBadge').className = "text-xs text-emerald-600 dark:text-emerald-400 font-semibold";
+                            }
+                        });
+                    };
+                };
+            };
+        }
+
+        async function synchronizeStorageStateFromCloudCloud() {
+            if (!supabaseClient || !activeUserSession) return;
+            
+            const { data, error } = await supabaseClient
+                .from('user_financial_states')
+                .select('payload')
+                .eq('user_id', activeUserSession.id)
+                .maybeSingle();
+
+            if (data && data.payload) {
+                const payload = data.payload;
+                const tx = db.transaction(['accounts', 'statements', 'savings'], 'readwrite');
+                
+                tx.objectStore('accounts').clear();
+                tx.objectStore('statements').clear();
+                tx.objectStore('savings').clear();
+
+                if (payload.accounts) payload.accounts.forEach(a => tx.objectStore('accounts').put(a));
+                if (payload.statements) payload.statements.forEach(s => tx.objectStore('statements').add(s));
+                if (payload.savings) payload.savings.forEach(s => tx.objectStore('savings').add(s));
+
+                return new Promise(resolve => tx.oncomplete = resolve);
+            }
+        }
+
+        function createNewLiabilityAccount() {
+            const nameInput = document.getElementById('newAccName');
+            const limitInput = document.getElementById('newAccLimit');
+            const balInput = document.getElementById('newAccBalance');
+            const stratSelect = document.getElementById('newAccStrategy');
+
+            const name = nameInput.value.trim();
+            const limit = parseFloat(limitInput.value);
+            const balance = parseFloat(balInput.value);
+            const strategy = stratSelect.value;
+
+            if (!name || isNaN(limit) || isNaN(balance)) {
+                return alert("Validation Mismatch: Please check your configuration parameters.");
+            }
+
+            const isLight = document.body.classList.contains("light-theme");
+            let colorMapping = isLight ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' : 'bg-indigo-950/40 text-indigo-300 border border-indigo-900/40';
+            
+            if (strategy === 'attack first') {
+                colorMapping = isLight ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-amber-700/30 text-amber-300 border border-amber-600/30';
+            }
+            if (strategy === 'minimums for now') {
+                colorMapping = isLight ? 'bg-rose-100 text-rose-800 border border-rose-200' : 'bg-rose-900/30 text-rose-300 border border-rose-600/30';
+            }
+
+            const id = 'acc_' + Date.now();
+            const newAccountObj = {
+                id,
+                name,
+                limit,
+                currentBalance: balance,
+                initialBalance: limit,
+                strategy,
+                strategyColor: colorMapping
+            };
+
+            const tx = db.transaction(['accounts'], 'readwrite');
+            tx.objectStore('accounts').put(newAccountObj);
+            tx.oncomplete = () => {
+                nameInput.value = '';
+                limitInput.value = '';
+                balInput.value = '';
+                forceCloudStateBackupSynchronization();
+                renderWorkspace();
+            };
+        }
+
+        function deleteLiabilityAccount(id) {
+            if (!confirm("Delete this liability account tracking instance entirely?")) return;
+            const tx = db.transaction(['accounts', 'statements'], 'readwrite');
+            tx.objectStore('accounts').delete(id);
+            
+            const stateStore = tx.objectStore('statements');
+            stateStore.getAll().onsuccess = (e) => {
+                const logs = e.target.result;
+                logs.forEach(l => {
+                    if (l.accountId === id) stateStore.delete(l.id);
+                });
+            };
+
+            tx.oncomplete = () => {
+                forceCloudStateBackupSynchronization();
+                renderWorkspace();
+            };
+        }
+
+        function renderWorkspace() {
+            const container = document.getElementById('cardsContainer');
+            const savingsContainer = document.getElementById('savingsContainer');
+            container.innerHTML = '';
+            savingsContainer.innerHTML = '';
+            
+            const currentMonthStr = new Date().toISOString().slice(0, 7);
+            const isLight = document.body.classList.contains("light-theme");
+
+            db.transaction('accounts').objectStore('accounts').getAll().onsuccess = (accEvent) => {
+                const accounts = accEvent.target.result;
+
+                db.transaction('statements').objectStore('statements').getAll().onsuccess = (stateEvent) => {
+                    const allStatements = stateEvent.target.result;
+
+                    let totalDebtRemaining = 0;
+                    let totalInterestPaid = 0;
+                    let distinctMonths = new Set();
+
+                    if(accounts.length === 0) {
+                        container.innerHTML = `<p class="text-xs text-slate-400 dark:text-gray-500 text-center py-10 bg-white dark:bg-gray-900/40 rounded-xl border border-dashed border-slate-300 dark:border-gray-800">No core liability tracking profiles configured yet. Add one above.</p>`;
+                    }
+
+                    accounts.forEach(acc => {
+                        const cardStatements = allStatements
+                            .filter(s => s.accountId === acc.id)
+                            .sort((a,b) => a.month.localeCompare(b.month));
+
+                        let dynamicBalance = acc.currentBalance;
+                        const paidPercentage = acc.limit > 0 ? Math.min(100, Math.max(0, ((acc.limit - dynamicBalance) / acc.limit) * 100)) : 0;
+
+                        totalDebtRemaining += dynamicBalance;
+                        cardStatements.forEach(s => {
+                            totalInterestPaid += s.interestCharged;
+                            distinctMonths.add(s.month);
+                        });
+
+                        let statementsMarkup = `<p class="text-xs text-slate-400 dark:text-gray-500 text-center py-4">No statements logged yet</p>`;
+                        if (cardStatements.length > 0) {
+                            statementsMarkup = `<div class="space-y-2 mt-4 max-h-48 overflow-y-auto pr-1 custom-scrollbar w-full">`;
+                            cardStatements.forEach(s => {
+                                statementsMarkup += `
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center text-xs bg-slate-100 dark:bg-gray-900/60 p-3 rounded-lg border border-slate-200 dark:border-gray-800 gap-2 w-full overflow-hidden">
+                                        <div class="font-semibold text-slate-700 dark:text-gray-300 shrink-0">${formatMonthLabel(s.month)}</div>
+                                        <div class="flex flex-row flex-wrap gap-x-3 gap-y-1 font-mono justify-between sm:justify-end text-[11px] sm:text-xs overflow-hidden text-ellipsis whitespace-nowrap">
+                                            <span class="text-slate-500 dark:text-gray-400">Paid: <strong class="text-indigo-600 dark:text-indigo-400">${s.paymentMade.toLocaleString()}</strong></span>
+                                            <span class="text-emerald-600 dark:text-emerald-400">Drop: <strong>${s.balanceDrop.toLocaleString()}</strong></span>
+                                            <span class="text-rose-600 dark:text-rose-400">Int: <strong>${s.interestCharged.toLocaleString()}</strong></span>
+                                        </div>
+                                    </div>`;
+                            });
+                            statementsMarkup += `</div>`;
+                        }
+
+                        let currentStratColor = acc.strategyColor;
+                        if (isLight && currentStratColor.includes('950/40')) {
+                            currentStratColor = 'bg-indigo-50 text-indigo-700 border border-indigo-100';
+                        } else if (!isLight && currentStratColor.includes('indigo-50')) {
+                            currentStratColor = 'bg-indigo-950/40 text-indigo-300 border border-indigo-900/40';
+                        }
+
+                        container.innerHTML += `
+                            <div class="account-card p-4 sm:p-6 rounded-xl w-full max-w-full box-border overflow-hidden">
+                                <div class="flex justify-between items-start mb-4 gap-2">
+                                    <div>
+                                        <h2 class="text-base sm:text-lg font-bold tracking-tight">${acc.name}</h2>
+                                        <button onclick="deleteLiabilityAccount('${acc.id}')" class="text-[10px] text-rose-500 font-semibold hover:underline transition-colors mt-0.5 block">Delete Account</button>
+                                    </div>
+                                    <span class="text-[9px] tracking-wider uppercase font-bold px-2 py-1 rounded shrink-0 whitespace-nowrap ${currentStratColor}">
+                                        ${acc.strategy}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between items-baseline mb-2">
+                                    <span class="text-xs text-slate-500 dark:text-gray-400 font-medium">Current balance</span>
+                                    <span class="text-lg sm:text-xl font-bold font-mono text-indigo-600 dark:text-indigo-400">LKR ${dynamicBalance.toLocaleString()}</span>
+                                </div>
+                                <div class="mb-6">
+                                    <div class="w-full bg-slate-200 dark:bg-gray-800 h-2 rounded-full overflow-hidden shadow-inner">
+                                        <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-full transition-all duration-500 shadow-md" style="width: ${paidPercentage}%"></div>
+                                    </div>
+                                    <span class="text-[11px] text-slate-500 dark:text-gray-400 font-medium mt-1 block">${paidPercentage.toFixed(0)}% cleared</span>
+                                </div>
+                                <div class="border-t border-slate-200 dark:border-gray-800/80 pt-4 w-full">
+                                    <h4 class="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-3">Log Statement Summary</h4>
+                                    
+                                    <div class="flex flex-col gap-4 md:grid md:grid-cols-3 md:gap-3 items-end w-full box-border">
+                                        <div class="w-full box-border">
+                                            <label class="text-[11px] text-slate-600 dark:text-gray-400 block mb-1.5 font-semibold uppercase">Month</label>
+                                            <div class="relative w-full block box-border">
+                                                <input id="month-${acc.id}" type="month" value="${currentMonthStr}" class="w-full pl-3 pr-10 rounded-lg font-mono block box-border font-medium">
+                                                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-indigo-500 z-10">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="w-full box-border">
+                                            <label class="text-[11px] text-slate-600 dark:text-gray-400 block mb-1.5 font-semibold uppercase">New Balance (LKR)</label>
+                                            <input id="newBal-${acc.id}" type="number" placeholder="e.g. 285000" class="w-full px-3 rounded-lg font-mono block box-border">
+                                        </div>
+                                        <div class="w-full box-border">
+                                            <label class="text-[11px] text-slate-600 dark:text-gray-400 block mb-1.5 font-semibold uppercase">Payment Made (LKR)</label>
+                                            <input id="payMade-${acc.id}" type="number" placeholder="e.g. 52000" class="w-full px-3 rounded-lg font-mono block box-border">
+                                        </div>
+                                    </div>
+                                    
+                                    <button onclick="commitStatement('${acc.id}')" class="w-full md:w-auto bg-gradient-to-r from-slate-900 to-indigo-950 dark:from-indigo-600 dark:to-purple-600 hover:brightness-110 text-white font-bold h-[44px] md:h-[38px] rounded-lg text-xs transition-colors mt-4 flex items-center justify-center px-6 shadow-md">
+                                        Confirm & Add Log Entry
+                                    </button>
+                                </div>
+                                ${statementsMarkup}
+                            </div>
+                        `;
+                    });
+
+                    db.transaction('savings').objectStore('savings').getAll().onsuccess = (saveEvent) => {
+                        const savingsGoals = saveEvent.target.result;
+                        let totalSavedCapital = 0;
+
+                        if (savingsGoals.length === 0) {
+                            savingsContainer.innerHTML = `<p class="text-xs text-slate-400 dark:text-gray-500 text-center py-6 bg-white dark:bg-gray-900/20 rounded-xl border border-dashed border-slate-300 dark:border-gray-800">No custom goals set yet.</p>`;
+                        }
+
+                        savingsGoals.forEach(goal => {
+                            totalSavedCapital += goal.current;
+                            const savePercent = goal.target > 0 ? Math.min(100, Math.max(0, (goal.current / goal.target) * 100)) : 0;
+
+                            savingsContainer.innerHTML += `
+                                <div class="savings-card p-4 rounded-xl w-full">
+                                    <div class="flex justify-between items-start mb-1 gap-2">
+                                        <h3 class="text-sm font-bold truncate tracking-tight">${goal.name}</h3>
+                                        <button onclick="deleteSavingsGoal(${goal.id})" class="text-[10px] text-rose-500 font-bold hover:underline transition-colors shrink-0">Delete</button>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-gray-400 font-mono mb-3">Target: LKR ${goal.target.toLocaleString()}</p>
+                                    <div class="flex justify-between items-baseline mb-1 text-xs">
+                                        <span class="text-emerald-600 dark:text-emerald-400 font-bold font-mono">LKR ${goal.current.toLocaleString()}</span>
+                                        <span class="text-slate-500 dark:text-gray-400 font-medium text-[10px]">${savePercent.toFixed(0)}% reached</span>
+                                    </div>
+                                    <div class="w-full bg-slate-200/80 dark:bg-gray-800 h-2 rounded-full overflow-hidden mb-4">
+                                        <div class="bg-gradient-to-r from-emerald-500 to-teal-500 h-full transition-all duration-500" style="width: ${savePercent}%"></div>
+                                    </div>
+                                    <div class="flex gap-1.5 items-center pt-2 border-t border-emerald-200/40 dark:border-gray-800/60">
+                                        <select id="saveAction-${goal.id}" class="text-[11px] px-1.5 rounded-lg bg-white dark:bg-gray-800 font-medium max-w-[110px]">
+                                            <option value="add">➕ Deposit</option>
+                                            <option value="sub">➖ Withdraw</option>
+                                        </select>
+                                        <input id="saveAmt-${goal.id}" type="number" placeholder="Amount" class="w-full text-[11px] px-1.5 rounded-lg font-mono">
+                                        <button onclick="mutateSavingsCapital(${goal.id})" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 h-[34px] rounded-lg text-[11px] font-bold transition-all flex items-center justify-center shadow-md">Go</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        document.getElementById('statRemaining').innerText = `LKR ${totalDebtRemaining.toLocaleString()}`;
+                        document.getElementById('statSaved').innerText = `LKR ${totalSavedCapital.toLocaleString()}`;
+                        document.getElementById('statInterest').innerText = `LKR ${totalInterestPaid.toLocaleString()}`;
+                        document.getElementById('statMonths').innerText = distinctMonths.size;
+                    };
+                };
+            };
+        }
+
+        function commitStatement(accountId) {
+            const newBalInput = document.getElementById(`newBal-${accountId}`);
+            const payMadeInput = document.getElementById(`payMade-${accountId}`);
+            const monthInput = document.getElementById(`month-${accountId}`);
+
+            const newBalance = parseFloat(newBalInput.value);
+            const paymentMade = parseFloat(payMadeInput.value);
+            const selectedMonth = monthInput.value;
+
+            if (isNaN(newBalance) || isNaN(paymentMade) || !selectedMonth) return alert("Validation Error: Please fill out all parameters.");
+
+            const tx = db.transaction(['accounts', 'statements'], 'readwrite');
+            const accStore = tx.objectStore('accounts');
+            const stateStore = tx.objectStore('statements');
+
+            accStore.get(accountId).onsuccess = (e) => {
+                const account = e.target.result;
+                if (!account) return;
+
+                const previousBalance = account.currentBalance;
+                const expectedBalanceWithoutInterest = previousBalance - paymentMade;
+                const interestCharged = Math.max(0, newBalance - expectedBalanceWithoutInterest);
+                const balanceDrop = Math.max(0, previousBalance - newBalance);
+
+                account.currentBalance = newBalance;
+                accStore.put(account);
+                stateStore.add({ accountId, month: selectedMonth, newBalance, paymentMade, interestCharged, balanceDrop });
+            };
+
+            tx.oncomplete = () => {
+                newBalInput.value = '';
+                payMadeInput.value = '';
+                forceCloudStateBackupSynchronization();
+                renderWorkspace();
+            };
+        }
+
+        function createNewSavingsGoal() {
+            const nameInput = document.getElementById('newSaveName');
+            const targetInput = document.getElementById('newSaveTarget');
+            const name = nameInput.value.trim();
+            const target = parseFloat(targetInput.value);
+
+            if (!name || isNaN(target) || target <= 0) return alert("Validation Mismatch: Provide a label name and target metric.");
+
+            const tx = db.transaction(['savings'], 'readwrite');
+            tx.objectStore('savings').add({ name, target, current: 0 });
+            tx.oncomplete = () => {
+                nameInput.value = '';
+                targetInput.value = '';
+                forceCloudStateBackupSynchronization();
+                renderWorkspace();
+            };
+        }
+
+        function mutateSavingsCapital(goalId) {
+            const amtInput = document.getElementById(`saveAmt-${goalId}`);
+            const actionSelect = document.getElementById(`saveAction-${goalId}`);
+            const amount = parseFloat(amtInput.value);
+            const action = actionSelect.value;
+
+            if (isNaN(amount) || amount <= 0) return alert("Validation Error: Input value must be a functional positive number.");
+
+            const tx = db.transaction(['savings'], 'readwrite');
+            const store = tx.objectStore('savings');
+
+            store.get(goalId).onsuccess = (e) => {
+                const goal = e.target.result;
+                if (!goal) return;
+                goal.current = (action === 'add') ? goal.current + amount : Math.max(0, goal.current - amount);
+                store.put(goal);
+            };
+
+            tx.oncomplete = () => {
+                amtInput.value = '';
+                forceCloudStateBackupSynchronization();
+                renderWorkspace();
+            };
+        }
+
+        function deleteSavingsGoal(id) {
+            if (!confirm("Delete this savings goal?")) return;
+            const tx = db.transaction(['savings'], 'readwrite');
+            tx.objectStore('savings').delete(id);
+            tx.oncomplete = () => {
+                forceCloudStateBackupSynchronization();
+                renderWorkspace();
+            };
+        }
+
+        function formatMonthLabel(monthString) {
+            const [year, month] = monthString.split('-');
+            return new Date(year, parseInt(month) - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        }
+
+        function exportEngineData() {
+            const dump = {};
+            const tx = db.transaction(['accounts', 'statements', 'savings'], 'readonly');
+            tx.objectStore('accounts').getAll().onsuccess = e1 => {
+                dump.accounts = e1.target.result;
+                tx.objectStore('statements').getAll().onsuccess = e2 => {
+                    dump.statements = e2.target.result;
+                    tx.objectStore('savings').getAll().onsuccess = e3 => {
+                        dump.savings = e3.target.result;
+                        const blob = new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' });
+                        const a = document.createElement('a');
+                        a.href = URL.createObjectURL(blob);
+                        a.download = `portfolio_backup_${new Date().getTime()}.json`;
+                        a.click();
+                    };
+                };
+            };
+        }
+
+        function importEngineData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    const tx = db.transaction(['accounts', 'statements', 'savings'], 'readwrite');
+                    const accStore = tx.objectStore('accounts');
+                    const stateStore = tx.objectStore('statements');
+                    const saveStore = tx.objectStore('savings');
+
+                    accStore.clear(); stateStore.clear(); saveStore.clear();
+
+                    if (parsed.accounts) {
+                        parsed.accounts.forEach(a => accStore.put(a));
+                        if (parsed.statements) parsed.statements.forEach(s => stateStore.add(s));
+                        if (parsed.savings) parsed.savings.forEach(s => saveStore.add(s));
+                    }
+                    tx.oncomplete = () => {
+                        forceCloudStateBackupSynchronization();
+                        renderWorkspace();
+                    };
+                } catch (err) {
+                    alert("Import Error: Failed to safely parse backup source file payload structure.");
+                }
+            };
+            reader.readAsText(file);
+        }
+    </script>
 </body>
 </html>
