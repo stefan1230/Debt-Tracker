@@ -17,10 +17,10 @@
         body { 
             font-family: 'Inter', sans-serif; 
             -webkit-tap-highlight-color: transparent;
-            touch-action: auto; /* Fixed desktop wheel scroll issue */
+            touch-action: auto;
             -webkit-user-select: none;
             user-select: none;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         input, select, textarea {
@@ -28,35 +28,45 @@
             user-select: text;
         }
 
-        /* LIGHT THEME RULES */
-        body.light-theme { background-color: #f8fafc; color: #0f172a; }
-        body.light-theme .stat-card { background-color: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05); }
-        body.light-theme .account-card { background-color: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); }
-        body.light-theme .savings-card { background-color: #f0fdf4; border: 1px solid #bbf7d0; }
+        /* 🌈 VIBRANT LIGHT THEME */
+        body.light-theme { background-color: #f1f5f9; color: #0f172a; }
+        body.light-theme .stat-debt { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1px solid #fde68a; }
+        body.light-theme .stat-saved { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid #bbf7d0; }
+        body.light-theme .stat-interest { background: linear-gradient(135deg, #fff5f5 0%, #ffe3e3 100%); border: 1px solid #ffc9c9; }
+        body.light-theme .stat-months { background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%); border: 1px solid #c7d2fe; }
+        
+        body.light-theme .account-card { background-color: #ffffff; border: 1px solid #e2e8f0; border-top: 4px solid #6366f1; box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.05); }
+        body.light-theme .savings-card { background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); border: 1px solid #bbf7d0; border-left: 4px solid #10b981; }
+        
         body.light-theme input, body.light-theme select { 
             background-color: #ffffff !important; 
             border: 1px solid #cbd5e1 !important; 
             color: #0f172a !important; 
         }
         body.light-theme input::placeholder { color: #94a3b8 !important; }
-        body.light-theme header { border-color: #e2e8f0; }
-        body.light-theme .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-        body.light-theme .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; }
+        body.light-theme header { border-color: #cbd5e1; }
+        body.light-theme .custom-scrollbar::-webkit-scrollbar-track { background: #e2e8f0; }
+        body.light-theme .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; }
 
-        /* DARK THEME RULES */
-        body.dark-theme { background-color: #1a1a1a; color: #f1f5f9; }
-        body.dark-theme .stat-card { background-color: #222222; border: 1px solid #2d2d2d; box-shadow: none; }
-        body.dark-theme .account-card { background-color: #262626; border: 1px solid #333333; box-shadow: none; }
-        body.dark-theme .savings-card { background-color: #1e293b; border: 1px solid #334155; }
+        /* 🌌 RICH DARK THEME */
+        body.dark-theme { background-color: #0b0f19; color: #f1f5f9; }
+        body.dark-theme .stat-debt { background: linear-gradient(135deg, #1e1b4b 0%, #2e1065 100%); border: 1px solid #4c1d95; }
+        body.dark-theme .stat-saved { background: linear-gradient(135deg, #022c22 0%, #064e3b 100%); border: 1px solid #065f46; }
+        body.dark-theme .stat-interest { background: linear-gradient(135deg, #4c0519 0%, #881337 100%); border: 1px solid #9f1239; }
+        body.dark-theme .stat-months { background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%); border: 1px solid #1e40af; }
+        
+        body.dark-theme .account-card { background-color: #111827; border: 1px solid #1f2937; border-top: 4px solid #818cf8; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3); }
+        body.dark-theme .savings-card { background: linear-gradient(135deg, #0f172a 0%, #111827 100%); border: 1px solid #1e293b; border-left: 4px solid #34d399; }
+        
         body.dark-theme input, body.dark-theme select { 
-            background-color: #2a2a2a !important; 
-            border: 1px solid #444444 !important; 
+            background-color: #1f2937 !important; 
+            border: 1px solid #374151 !important; 
             color: #ffffff !important; 
         }
         body.dark-theme input::placeholder { color: #6b7280 !important; }
-        body.dark-theme header { border-color: #2d2d2d; }
-        body.dark-theme .custom-scrollbar::-webkit-scrollbar-track { background: #1f1f1f; }
-        body.dark-theme .custom-scrollbar::-webkit-scrollbar-thumb { background: #3f3f46; }
+        body.dark-theme header { border-color: #1f2937; }
+        body.dark-theme .custom-scrollbar::-webkit-scrollbar-track { background: #111827; }
+        body.dark-theme .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; }
 
         input, select { 
             font-size: 16px !important; 
@@ -91,8 +101,8 @@
             } 
         }
         
-        body.light-theme input:focus, body.light-theme select:focus { outline: none !important; border-color: #94a3b8 !important; }
-        body.dark-theme input:focus, body.dark-theme select:focus { outline: none !important; border-color: #555555 !important; }
+        body.light-theme input:focus, body.light-theme select:focus { outline: none !important; border-color: #6366f1 !important; box-shadow: 0 0 0 2px rgb(99 102 241 / 0.2); }
+        body.dark-theme input:focus, body.dark-theme select:focus { outline: none !important; border-color: #818cf8 !important; box-shadow: 0 0 0 2px rgb(129 140 248 / 0.2); }
         
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { border-radius: 2px; }
@@ -101,18 +111,18 @@
 <body class="dark-theme p-3 sm:p-4 md:p-6 lg:p-8 min-h-screen flex items-start justify-center">
 
     <div id="authContainer" class="w-full max-w-sm account-card p-5 sm:p-6 rounded-xl self-center">
-        <h2 class="text-xl font-bold mb-1 current-text">Private Financial Gateway</h2>
-        <p class="text-xs text-slate-400 dark:text-zinc-500 mb-4">Provide parameters to sync secure device storage engine cloud state.</p>
+        <h2 class="text-xl font-bold mb-1 tracking-tight">Private Financial Gateway</h2>
+        <p class="text-xs text-slate-500 dark:text-gray-400 mb-4">Provide parameters to sync secure device storage engine cloud state.</p>
         <div class="space-y-3">
             <div>
-                <label class="text-[10px] text-slate-500 dark:text-zinc-400 font-medium block mb-1">Email Address</label>
+                <label class="text-[10px] text-slate-600 dark:text-gray-300 font-semibold uppercase block mb-1">Email Address</label>
                 <input id="loginEmail" type="email" placeholder="you@example.com" class="w-full px-2.5 rounded-lg">
             </div>
             <div>
-                <label class="text-[10px] text-slate-500 dark:text-zinc-400 font-medium block mb-1">Password</label>
+                <label class="text-[10px] text-slate-600 dark:text-gray-300 font-semibold uppercase block mb-1">Password</label>
                 <input id="loginPassword" type="password" placeholder="••••••••" class="w-full px-2.5 rounded-lg">
             </div>
-            <button onclick="handleCloudAuthentication()" class="w-full bg-slate-900 dark:bg-zinc-100 hover:bg-slate-800 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 font-bold h-[42px] rounded-lg text-xs transition-colors mt-2 flex items-center justify-center">
+            <button onclick="handleCloudAuthentication()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold h-[42px] rounded-lg text-xs transition-colors mt-2 flex items-center justify-center shadow-md">
                 Establish Session & Sync
             </button>
             <p id="authError" class="text-rose-500 text-xs text-center hidden mt-2"></p>
@@ -122,81 +132,81 @@
     <div id="appContainer" class="w-full max-w-[1400px] mx-auto hidden transition-all duration-300">
         <header class="flex flex-col gap-4 sm:gap-2 md:flex-row md:justify-between md:items-center mb-6 border-b pb-4">
             <div>
-                <h1 class="text-lg sm:text-xl font-bold">Cloud Connected Ledger Workspace</h1>
-                <p id="syncBadge" class="text-[11px] sm:text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">● Connected to Free Supabase Cloud Instance</p>
+                <h1 class="text-lg sm:text-2xl font-bold tracking-tight bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">Cloud Connected Ledger Workspace</h1>
+                <p id="syncBadge" class="text-[11px] sm:text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">● Connected to Free Supabase Cloud Instance</p>
             </div>
             
             <div class="flex flex-wrap items-center gap-2">
-                <button onclick="toggleThemeConfig()" class="bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200 px-3 h-[36px] rounded-lg text-[11px] sm:text-xs font-medium transition-all flex items-center gap-1.5 border border-slate-300 dark:border-zinc-700">
+                <button onclick="toggleThemeConfig()" class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-3 h-[36px] rounded-lg text-[11px] sm:text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm hover:brightness-110">
                     <span id="themeIcon">🌙</span> <span id="themeText">Dark Mode</span>
                 </button>
                 
                 <div class="grid grid-cols-3 gap-1.5 sm:flex sm:gap-2">
-                    <button onclick="handleSessionSignOut()" class="bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 text-rose-600 dark:text-rose-400 px-2 sm:px-3 h-[36px] rounded-lg text-[11px] sm:text-xs font-medium transition-all text-center flex items-center justify-center border border-slate-300 dark:border-zinc-700">Sign Out</button>
-                    <button onclick="exportEngineData()" class="bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-300 px-2 sm:px-3 h-[36px] rounded-lg text-[11px] sm:text-xs font-medium transition-all text-center flex items-center justify-center border border-slate-300 dark:border-zinc-700">Backup JSON</button>
+                    <button onclick="handleSessionSignOut()" class="bg-rose-500 hover:bg-rose-600 text-white px-2 sm:px-3 h-[36px] rounded-lg text-[11px] sm:text-xs font-semibold transition-all text-center flex items-center justify-center shadow-sm">Sign Out</button>
+                    <button onclick="exportEngineData()" class="bg-slate-200 dark:bg-gray-800 hover:bg-slate-300 dark:hover:bg-gray-700 text-slate-800 dark:text-gray-200 px-2 sm:px-3 h-[36px] rounded-lg text-[11px] sm:text-xs font-medium transition-all text-center flex items-center justify-center border border-slate-300 dark:border-gray-700">Backup JSON</button>
                     <input type="file" id="importFile" class="hidden" onchange="importEngineData(event)">
-                    <button onclick="document.getElementById('importFile').click()" class="bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-300 px-2 sm:px-3 h-[36px] rounded-lg text-[11px] sm:text-xs font-medium transition-all text-center flex items-center justify-center border border-slate-300 dark:border-zinc-700">Restore JSON</button>
+                    <button onclick="document.getElementById('importFile').click()" class="bg-slate-200 dark:bg-gray-800 hover:bg-slate-300 dark:hover:bg-gray-700 text-slate-800 dark:text-gray-200 px-2 sm:px-3 h-[36px] rounded-lg text-[11px] sm:text-xs font-medium transition-all text-center flex items-center justify-center border border-slate-300 dark:border-gray-700">Restore JSON</button>
                 </div>
             </div>
         </header>
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-            <div class="stat-card p-3 sm:p-4 rounded-xl">
-                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-zinc-400 font-medium">Total debt remaining</p>
-                <p id="statRemaining" class="text-base sm:text-lg font-bold text-amber-600 dark:text-amber-500 mt-1 truncate">LKR 0</p>
+            <div class="stat-debt p-3 sm:p-5 rounded-xl transition-all">
+                <p class="text-[11px] sm:text-xs text-amber-800 dark:text-amber-300 font-semibold uppercase tracking-wider">Total debt remaining</p>
+                <p id="statRemaining" class="text-lg sm:text-2xl font-bold text-amber-700 dark:text-amber-400 mt-1 truncate font-mono">LKR 0</p>
             </div>
-            <div class="stat-card p-3 sm:p-4 rounded-xl">
-                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-zinc-400 font-medium">Total capital saved</p>
-                <p id="statSaved" class="text-base sm:text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-1 truncate">LKR 0</p>
+            <div class="stat-saved p-3 sm:p-5 rounded-xl transition-all">
+                <p class="text-[11px] sm:text-xs text-emerald-800 dark:text-emerald-300 font-semibold uppercase tracking-wider">Total capital saved</p>
+                <p id="statSaved" class="text-lg sm:text-2xl font-bold text-emerald-700 dark:text-emerald-400 mt-1 truncate font-mono">LKR 0</p>
             </div>
-            <div class="stat-card p-3 sm:p-4 rounded-xl">
-                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-zinc-400 font-medium">Interest paid (est.)</p>
-                <p id="statInterest" class="text-base sm:text-lg font-bold text-rose-600 dark:text-rose-500 mt-1 truncate">LKR 0</p>
+            <div class="stat-interest p-3 sm:p-5 rounded-xl transition-all">
+                <p class="text-[11px] sm:text-xs text-rose-800 dark:text-rose-300 font-semibold uppercase tracking-wider">Interest paid (est.)</p>
+                <p id="statInterest" class="text-lg sm:text-2xl font-bold text-rose-700 dark:text-rose-400 mt-1 truncate font-mono">LKR 0</p>
             </div>
-            <div class="stat-card p-3 sm:p-4 rounded-xl">
-                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-zinc-400 font-medium">Months tracked</p>
-                <p id="statMonths" class="text-base sm:text-lg font-bold mt-1">0</p>
+            <div class="stat-months p-3 sm:p-5 rounded-xl transition-all">
+                <p class="text-[11px] sm:text-xs text-indigo-800 dark:text-indigo-300 font-semibold uppercase tracking-wider">Months tracked</p>
+                <p id="statMonths" class="text-lg sm:text-2xl font-bold text-indigo-700 dark:text-indigo-400 mt-1 font-mono">0</p>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
             <div class="lg:col-span-2 space-y-6">
-                <div class="account-card p-4 rounded-xl space-y-3">
-                    <h3 class="text-xs font-semibold text-slate-600 dark:text-zinc-300 uppercase tracking-wider flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Register Liability Account
+                <div class="account-card p-4 sm:p-5 rounded-xl space-y-4">
+                    <h3 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span> Register Liability Account
                     </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <input id="newAccName" type="text" placeholder="Account Name (e.g. DFCC Gold Card)" class="w-full px-3 rounded-lg">
                         <input id="newAccLimit" type="number" placeholder="Credit Limit / Principal (LKR)" class="w-full px-3 rounded-lg">
                         <input id="newAccBalance" type="number" placeholder="Current Outstanding Balance (LKR)" class="w-full px-3 rounded-lg">
-                        <select id="newAccStrategy" class="w-full px-3 rounded-lg">
-                            <option value="attack first">Aggressive Paydown (Attack First)</option>
-                            <option value="minimums for now">Holding Pattern (Minimums For Now)</option>
-                            <option value="deferred interest">Deferred Balance Strategy</option>
+                        <select id="newAccStrategy" class="w-full px-3 rounded-lg font-medium">
+                            <option value="attack first">🔥 Aggressive Paydown (Attack First)</option>
+                            <option value="minimums for now">🛡️ Holding Pattern (Minimums For Now)</option>
+                            <option value="deferred interest">⏳ Deferred Balance Strategy</option>
                         </select>
                     </div>
-                    <button onclick="createNewLiabilityAccount()" class="w-full bg-amber-600 hover:bg-amber-500 text-white h-[38px] rounded-lg text-xs font-bold transition-all flex items-center justify-center shadow-sm">Initialize Account Entry</button>
+                    <button onclick="createNewLiabilityAccount()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white h-[40px] rounded-lg text-xs font-bold transition-all flex items-center justify-center shadow-md">Initialize Account Entry</button>
                 </div>
 
-                <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-2 flex items-center gap-2 pt-2">
+                <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400 mb-2 flex items-center gap-2 pt-2">
                     <span class="w-2 h-2 rounded-full bg-amber-500"></span> Liabilities & Statements
                 </h2>
                 <div id="cardsContainer" class="space-y-6 w-full max-w-full overflow-hidden"></div>
             </div>
             
             <div class="space-y-6">
-                <div class="account-card p-4 rounded-xl space-y-3">
-                    <h3 class="text-xs font-semibold text-slate-600 dark:text-zinc-300 uppercase tracking-wider flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Initialize Savings Goal
+                <div class="account-card p-4 sm:p-5 rounded-xl space-y-4" style="border-top-color: #10b981;">
+                    <h3 class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Initialize Savings Goal
                     </h3>
-                    <div class="space-y-2">
+                    <div class="space-y-2.5">
                         <input id="newSaveName" type="text" placeholder="Goal Label (e.g. Emergency Fund)" class="w-full px-3 rounded-lg">
                         <input id="newSaveTarget" type="number" placeholder="Target Amount (LKR)" class="w-full px-3 rounded-lg">
-                        <button onclick="createNewSavingsGoal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white h-[38px] rounded-lg text-xs font-bold transition-all flex items-center justify-center shadow-sm">Create Goal</button>
+                        <button onclick="createNewSavingsGoal()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white h-[40px] rounded-lg text-xs font-bold transition-all flex items-center justify-center shadow-md">Create Goal</button>
                     </div>
                 </div>
                 
-                <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-2 flex items-center gap-2">
+                <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400 mb-2 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Savings & Capital Goals
                 </h2>
                 <div id="savingsContainer" class="space-y-4"></div>
@@ -205,7 +215,6 @@
     </div>
 
     <script>
-        // Check local storage or match system setup for theme settings
         if (localStorage.getItem('themePreference') === 'light' || (!('themePreference' in localStorage) && window.matchMedia('(prefers-color-scheme: light)').matches)) {
             document.body.className = "light-theme";
             updateThemeInterfaceLabels("light");
@@ -239,18 +248,18 @@
             }
         }
 
-        // PWA Manifest Pipeline Configuration
+        // PWA Manifest Configuration
         const pwaManifestObj = {
             name: "Financial Portfolio Ledger",
             short_name: "Ledger",
             description: "Cloud Connected Personal Financial Workspace Engine",
             start_url: window.location.href,
             display: "standalone",
-            background_color: "#1a1a1a",
-            theme_color: "#1a1a1a",
+            background_color: "#0b0f19",
+            theme_color: "#0b0f19",
             orientation: "portrait",
             icons: [{
-                src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%2310b981'><circle cx='256' cy='256' r='240' fill='%23222222' stroke='%23333333' stroke-width='10'/><path d='M256 120v272M180 196h152M196 316h120' stroke='%2310b981' stroke-width='36' stroke-linecap='round'/></svg>",
+                src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%236366f1'><circle cx='256' cy='256' r='240' fill='%23111827' stroke='%23374151' stroke-width='10'/><path d='M256 120v272M180 196h152M196 316h120' stroke='%236366f1' stroke-width='36' stroke-linecap='round'/></svg>",
                 sizes: "512x512",
                 type: "image/svg+xml"
             }]
@@ -349,7 +358,7 @@
         async function forceCloudStateBackupSynchronization() {
             if (!supabaseClient || !activeUserSession) return;
             document.getElementById('syncBadge').innerText = "🔄 Uploading real-time updates...";
-            document.getElementById('syncBadge').className = "text-xs text-blue-500 dark:text-blue-400";
+            document.getElementById('syncBadge').className = "text-xs text-blue-500 dark:text-blue-400 font-semibold";
 
             const tx = db.transaction(['accounts', 'statements', 'savings'], 'readonly');
             const dataDump = {};
@@ -368,7 +377,7 @@
                         }).then(({ error }) => {
                             if (!error) {
                                 document.getElementById('syncBadge').innerText = "● Cloud State Synced Seamlessly";
-                                document.getElementById('syncBadge').className = "text-xs text-emerald-600 dark:text-emerald-400";
+                                document.getElementById('syncBadge').className = "text-xs text-emerald-600 dark:text-emerald-400 font-semibold";
                             }
                         });
                     };
@@ -417,13 +426,13 @@
             }
 
             const isLight = document.body.classList.contains("light-theme");
-            let colorMapping = isLight ? 'bg-slate-100 text-slate-700 border border-slate-200' : 'bg-zinc-800/60 text-zinc-300 border border-zinc-700/40';
+            let colorMapping = isLight ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' : 'bg-indigo-950/40 text-indigo-300 border border-indigo-900/40';
             
             if (strategy === 'attack first') {
-                colorMapping = isLight ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-amber-700/40 text-amber-300 border border-amber-600/30';
+                colorMapping = isLight ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-amber-700/30 text-amber-300 border border-amber-600/30';
             }
             if (strategy === 'minimums for now') {
-                colorMapping = isLight ? 'bg-blue-100 text-blue-800 border border-blue-200' : 'bg-blue-900/40 text-blue-300 border border-blue-600/30';
+                colorMapping = isLight ? 'bg-rose-100 text-rose-800 border border-rose-200' : 'bg-rose-900/30 text-rose-300 border border-rose-600/30';
             }
 
             const id = 'acc_' + Date.now();
@@ -487,7 +496,7 @@
                     let distinctMonths = new Set();
 
                     if(accounts.length === 0) {
-                        container.innerHTML = `<p class="text-xs text-slate-400 dark:text-zinc-500 text-center py-8 bg-slate-100 dark:bg-zinc-900/20 rounded-xl border border-dashed border-slate-200 dark:border-zinc-800">No core liability tracking profiles configured yet. Add one above.</p>`;
+                        container.innerHTML = `<p class="text-xs text-slate-400 dark:text-gray-500 text-center py-10 bg-white dark:bg-gray-900/40 rounded-xl border border-dashed border-slate-300 dark:border-gray-800">No core liability tracking profiles configured yet. Add one above.</p>`;
                     }
 
                     accounts.forEach(acc => {
@@ -504,15 +513,15 @@
                             distinctMonths.add(s.month);
                         });
 
-                        let statementsMarkup = `<p class="text-xs text-slate-400 dark:text-zinc-500 text-center py-4">No statements logged yet</p>`;
+                        let statementsMarkup = `<p class="text-xs text-slate-400 dark:text-gray-500 text-center py-4">No statements logged yet</p>`;
                         if (cardStatements.length > 0) {
                             statementsMarkup = `<div class="space-y-2 mt-4 max-h-48 overflow-y-auto pr-1 custom-scrollbar w-full">`;
                             cardStatements.forEach(s => {
                                 statementsMarkup += `
-                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center text-xs bg-slate-50 dark:bg-zinc-900/40 p-3 rounded-lg border border-slate-100 dark:border-zinc-800/60 gap-2 w-full overflow-hidden">
-                                        <div class="font-medium text-slate-700 dark:text-zinc-300 shrink-0">${formatMonthLabel(s.month)}</div>
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center text-xs bg-slate-100 dark:bg-gray-900/60 p-3 rounded-lg border border-slate-200 dark:border-gray-800 gap-2 w-full overflow-hidden">
+                                        <div class="font-semibold text-slate-700 dark:text-gray-300 shrink-0">${formatMonthLabel(s.month)}</div>
                                         <div class="flex flex-row flex-wrap gap-x-3 gap-y-1 font-mono justify-between sm:justify-end text-[11px] sm:text-xs overflow-hidden text-ellipsis whitespace-nowrap">
-                                            <span class="text-slate-500 dark:text-zinc-400">Paid: <strong class="text-slate-800 dark:text-zinc-200">${s.paymentMade.toLocaleString()}</strong></span>
+                                            <span class="text-slate-500 dark:text-gray-400">Paid: <strong class="text-indigo-600 dark:text-indigo-400">${s.paymentMade.toLocaleString()}</strong></span>
                                             <span class="text-emerald-600 dark:text-emerald-400">Drop: <strong>${s.balanceDrop.toLocaleString()}</strong></span>
                                             <span class="text-rose-600 dark:text-rose-400">Int: <strong>${s.interestCharged.toLocaleString()}</strong></span>
                                         </div>
@@ -521,44 +530,43 @@
                             statementsMarkup += `</div>`;
                         }
 
-                        // Sync running strategies colors dynamically if workspace changes modes
                         let currentStratColor = acc.strategyColor;
-                        if (isLight && currentStratColor.includes('zinc-800')) {
-                            currentStratColor = 'bg-slate-100 text-slate-700 border border-slate-200';
-                        } else if (!isLight && currentStratColor.includes('slate-100')) {
-                            currentStratColor = 'bg-zinc-800/60 text-zinc-300 border border-zinc-700/40';
+                        if (isLight && currentStratColor.includes('950/40')) {
+                            currentStratColor = 'bg-indigo-50 text-indigo-700 border border-indigo-100';
+                        } else if (!isLight && currentStratColor.includes('indigo-50')) {
+                            currentStratColor = 'bg-indigo-950/40 text-indigo-300 border border-indigo-900/40';
                         }
 
                         container.innerHTML += `
                             <div class="account-card p-4 sm:p-6 rounded-xl w-full max-w-full box-border overflow-hidden">
                                 <div class="flex justify-between items-start mb-4 gap-2">
                                     <div>
-                                        <h2 class="text-sm sm:text-md font-bold">${acc.name}</h2>
-                                        <button onclick="deleteLiabilityAccount('${acc.id}')" class="text-[10px] text-slate-400 dark:text-zinc-500 hover:text-rose-500 transition-colors mt-0.5 block">Delete Account</button>
+                                        <h2 class="text-base sm:text-lg font-bold tracking-tight">${acc.name}</h2>
+                                        <button onclick="deleteLiabilityAccount('${acc.id}')" class="text-[10px] text-rose-500 font-semibold hover:underline transition-colors mt-0.5 block">Delete Account</button>
                                     </div>
-                                    <span class="text-[9px] tracking-wider uppercase font-bold px-2 py-0.5 rounded shrink-0 whitespace-nowrap ${currentStratColor}">
+                                    <span class="text-[9px] tracking-wider uppercase font-bold px-2 py-1 rounded shrink-0 whitespace-nowrap ${currentStratColor}">
                                         ${acc.strategy}
                                     </span>
                                 </div>
                                 <div class="flex justify-between items-baseline mb-2">
-                                    <span class="text-xs text-slate-500 dark:text-zinc-400">Current balance</span>
-                                    <span class="text-base sm:text-lg font-bold font-mono">LKR ${dynamicBalance.toLocaleString()}</span>
+                                    <span class="text-xs text-slate-500 dark:text-gray-400 font-medium">Current balance</span>
+                                    <span class="text-lg sm:text-xl font-bold font-mono text-indigo-600 dark:text-indigo-400">LKR ${dynamicBalance.toLocaleString()}</span>
                                 </div>
                                 <div class="mb-6">
-                                    <div class="w-full bg-slate-100 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden">
-                                        <div class="bg-slate-400 dark:bg-zinc-600 h-full transition-all duration-500" style="width: ${paidPercentage}%"></div>
+                                    <div class="w-full bg-slate-200 dark:bg-gray-800 h-2 rounded-full overflow-hidden shadow-inner">
+                                        <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-full transition-all duration-500 shadow-md" style="width: ${paidPercentage}%"></div>
                                     </div>
-                                    <span class="text-[11px] text-slate-400 dark:text-zinc-500 mt-1 block">${paidPercentage.toFixed(0)}% cleared</span>
+                                    <span class="text-[11px] text-slate-500 dark:text-gray-400 font-medium mt-1 block">${paidPercentage.toFixed(0)}% cleared</span>
                                 </div>
-                                <div class="border-t border-slate-100 dark:border-zinc-800/80 pt-4 w-full">
-                                    <h4 class="text-xs font-semibold text-slate-500 dark:text-zinc-400 mb-3">Log this month's statement</h4>
+                                <div class="border-t border-slate-200 dark:border-gray-800/80 pt-4 w-full">
+                                    <h4 class="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-3">Log Statement Summary</h4>
                                     
                                     <div class="flex flex-col gap-4 md:grid md:grid-cols-3 md:gap-3 items-end w-full box-border">
                                         <div class="w-full box-border">
-                                            <label class="text-[11px] text-slate-600 dark:text-zinc-400 block mb-1.5 font-medium">Statement Month</label>
+                                            <label class="text-[11px] text-slate-600 dark:text-gray-400 block mb-1.5 font-semibold uppercase">Month</label>
                                             <div class="relative w-full block box-border">
-                                                <input id="month-${acc.id}" type="month" value="${currentMonthStr}" class="w-full pl-3 pr-10 rounded-lg font-mono block box-border">
-                                                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 dark:text-zinc-300 z-10">
+                                                <input id="month-${acc.id}" type="month" value="${currentMonthStr}" class="w-full pl-3 pr-10 rounded-lg font-mono block box-border font-medium">
+                                                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-indigo-500 z-10">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                                     </svg>
@@ -566,16 +574,16 @@
                                             </div>
                                         </div>
                                         <div class="w-full box-border">
-                                            <label class="text-[11px] text-slate-600 dark:text-zinc-400 block mb-1.5 font-medium">New Statement Balance (LKR)</label>
+                                            <label class="text-[11px] text-slate-600 dark:text-gray-400 block mb-1.5 font-semibold uppercase">New Balance (LKR)</label>
                                             <input id="newBal-${acc.id}" type="number" placeholder="e.g. 285000" class="w-full px-3 rounded-lg font-mono block box-border">
                                         </div>
                                         <div class="w-full box-border">
-                                            <label class="text-[11px] text-slate-600 dark:text-zinc-400 block mb-1.5 font-medium">Payment Made (LKR)</label>
+                                            <label class="text-[11px] text-slate-600 dark:text-gray-400 block mb-1.5 font-semibold uppercase">Payment Made (LKR)</label>
                                             <input id="payMade-${acc.id}" type="number" placeholder="e.g. 52000" class="w-full px-3 rounded-lg font-mono block box-border">
                                         </div>
                                     </div>
                                     
-                                    <button onclick="commitStatement('${acc.id}')" class="w-full md:w-auto bg-slate-900 dark:bg-zinc-100 hover:bg-slate-800 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 font-bold h-[44px] md:h-[38px] rounded-lg text-xs transition-colors mt-4 flex items-center justify-center px-6 shadow-md">
+                                    <button onclick="commitStatement('${acc.id}')" class="w-full md:w-auto bg-gradient-to-r from-slate-900 to-indigo-950 dark:from-indigo-600 dark:to-purple-600 hover:brightness-110 text-white font-bold h-[44px] md:h-[38px] rounded-lg text-xs transition-colors mt-4 flex items-center justify-center px-6 shadow-md">
                                         Confirm & Add Log Entry
                                     </button>
                                 </div>
@@ -589,7 +597,7 @@
                         let totalSavedCapital = 0;
 
                         if (savingsGoals.length === 0) {
-                            savingsContainer.innerHTML = `<p class="text-xs text-slate-400 dark:text-zinc-500 text-center py-6 bg-white dark:bg-zinc-900/20 rounded-xl border border-dashed border-slate-200 dark:border-zinc-800">No custom goals set yet.</p>`;
+                            savingsContainer.innerHTML = `<p class="text-xs text-slate-400 dark:text-gray-500 text-center py-6 bg-white dark:bg-gray-900/20 rounded-xl border border-dashed border-slate-300 dark:border-gray-800">No custom goals set yet.</p>`;
                         }
 
                         savingsGoals.forEach(goal => {
@@ -599,24 +607,24 @@
                             savingsContainer.innerHTML += `
                                 <div class="savings-card p-4 rounded-xl w-full">
                                     <div class="flex justify-between items-start mb-1 gap-2">
-                                        <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">${goal.name}</h3>
-                                        <button onclick="deleteSavingsGoal(${goal.id})" class="text-[10px] text-slate-400 dark:text-slate-500 hover:text-rose-500 transition-colors shrink-0">Delete</button>
+                                        <h3 class="text-sm font-bold truncate tracking-tight">${goal.name}</h3>
+                                        <button onclick="deleteSavingsGoal(${goal.id})" class="text-[10px] text-rose-500 font-bold hover:underline transition-colors shrink-0">Delete</button>
                                     </div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 font-mono mb-3">Target: LKR ${goal.target.toLocaleString()}</p>
+                                    <p class="text-xs text-slate-500 dark:text-gray-400 font-mono mb-3">Target: LKR ${goal.target.toLocaleString()}</p>
                                     <div class="flex justify-between items-baseline mb-1 text-xs">
-                                        <span class="text-emerald-700 dark:text-emerald-400 font-bold font-mono">LKR ${goal.current.toLocaleString()}</span>
-                                        <span class="text-slate-500 dark:text-slate-400 text-[10px]">${savePercent.toFixed(0)}% reached</span>
+                                        <span class="text-emerald-600 dark:text-emerald-400 font-bold font-mono">LKR ${goal.current.toLocaleString()}</span>
+                                        <span class="text-slate-500 dark:text-gray-400 font-medium text-[10px]">${savePercent.toFixed(0)}% reached</span>
                                     </div>
-                                    <div class="w-full bg-slate-200/60 dark:bg-slate-900 h-1.5 rounded-full overflow-hidden mb-4 lines-box">
-                                        <div class="bg-emerald-600 dark:bg-emerald-500 h-full transition-all duration-500" style="width: ${savePercent}%"></div>
+                                    <div class="w-full bg-slate-200/80 dark:bg-gray-800 h-2 rounded-full overflow-hidden mb-4">
+                                        <div class="bg-gradient-to-r from-emerald-500 to-teal-500 h-full transition-all duration-500" style="width: ${savePercent}%"></div>
                                     </div>
-                                    <div class="flex gap-1.5 items-center pt-2 border-t border-emerald-200/60 dark:border-slate-700/40">
-                                        <select id="saveAction-${goal.id}" class="text-[10px] px-1.5 rounded-lg bg-white dark:bg-slate-800 max-w-[110px]">
-                                            <option value="add">Deposit (+)</option>
-                                            <option value="sub">Withdraw (-)</option>
+                                    <div class="flex gap-1.5 items-center pt-2 border-t border-emerald-200/40 dark:border-gray-800/60">
+                                        <select id="saveAction-${goal.id}" class="text-[11px] px-1.5 rounded-lg bg-white dark:bg-gray-800 font-medium max-w-[110px]">
+                                            <option value="add">➕ Deposit</option>
+                                            <option value="sub">➖ Withdraw</option>
                                         </select>
-                                        <input id="saveAmt-${goal.id}" type="number" placeholder="Amount" class="w-full text-[10px] px-1.5 rounded-lg font-mono">
-                                        <button onclick="mutateSavingsCapital(${goal.id})" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 h-[34px] rounded-lg text-[10px] font-bold transition-all flex items-center justify-center shadow-sm">Go</button>
+                                        <input id="saveAmt-${goal.id}" type="number" placeholder="Amount" class="w-full text-[11px] px-1.5 rounded-lg font-mono">
+                                        <button onclick="mutateSavingsCapital(${goal.id})" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 h-[34px] rounded-lg text-[11px] font-bold transition-all flex items-center justify-center shadow-md">Go</button>
                                     </div>
                                 </div>
                             `;
