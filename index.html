@@ -12,14 +12,14 @@
     <style>
         html, body {
             overflow-x: hidden;
-            overscroll-behavior-y: contain;
+            overscroll-behavior-y: auto;
         }
         body { 
             background-color: #1a1a1a; 
             color: #f1f5f9; 
             font-family: 'Inter', sans-serif; 
             -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
+            touch-action: auto; /* Fixed: Restores normal mouse roller/wheel scrolling actions */
             -webkit-user-select: none;
             user-select: none;
         }
@@ -51,7 +51,6 @@
             appearance: none;
         }
         
-        /* Tap optimization covering the full component area safely */
         input[type="month"]::-webkit-calendar-picker-indicator {
             position: absolute;
             top: 0;
@@ -131,30 +130,51 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
             <div class="lg:col-span-2 space-y-6">
-                <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-zinc-400 mb-2 flex items-center gap-2">
+                <div class="account-card p-4 rounded-xl space-y-3">
+                    <h3 class="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Register Liability Account
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <input id="newAccName" type="text" placeholder="Account Name (e.g. DFCC Gold Card)" class="w-full px-3 rounded-lg">
+                        <input id="newAccLimit" type="number" placeholder="Credit Limit / Principal (LKR)" class="w-full px-3 rounded-lg">
+                        <input id="newAccBalance" type="number" placeholder="Current Outstanding Balance (LKR)" class="w-full px-3 rounded-lg">
+                        <select id="newAccStrategy" class="w-full px-3 rounded-lg">
+                            <option value="attack first">Aggressive Paydown (Attack First)</option>
+                            <option value="minimums for now">Holding Pattern (Minimums For Now)</option>
+                            <option value="deferred interest">Deferred Balance Strategy</option>
+                        </select>
+                    </div>
+                    <button onclick="createNewLiabilityAccount()" class="w-full bg-amber-600 hover:bg-amber-500 text-white h-[38px] rounded-lg text-xs font-bold transition-all flex items-center justify-center">Initialize Account Entry</button>
+                </div>
+
+                <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-zinc-400 mb-2 flex items-center gap-2 pt-2">
                     <span class="w-2 h-2 rounded-full bg-amber-500"></span> Liabilities & Statements
                 </h2>
                 <div id="cardsContainer" class="space-y-6 w-full max-w-full overflow-hidden"></div>
             </div>
+            
             <div class="space-y-6">
-                <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-zinc-400 mb-2 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Savings & Capital Goals
-                </h2>
                 <div class="account-card p-4 rounded-xl space-y-3">
-                    <h3 class="text-xs font-semibold text-zinc-300">Initialize Savings Goal</h3>
+                    <h3 class="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Initialize Savings Goal
+                    </h3>
                     <div class="space-y-2">
                         <input id="newSaveName" type="text" placeholder="Goal Label (e.g. Emergency Fund)" class="w-full px-3 rounded-lg">
                         <input id="newSaveTarget" type="number" placeholder="Target Amount (LKR)" class="w-full px-3 rounded-lg">
                         <button onclick="createNewSavingsGoal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white h-[38px] rounded-lg text-xs font-bold transition-all flex items-center justify-center">Create Goal</button>
                     </div>
                 </div>
+                
+                <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-zinc-400 mb-2 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Savings & Capital Goals
+                </h2>
                 <div id="savingsContainer" class="space-y-4"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // Dynamic PWA Manifest Deployment Generator
+        // PWA Manifest Pipeline Configuration
         const pwaManifestObj = {
             name: "Financial Portfolio Ledger",
             short_name: "Ledger",
@@ -177,7 +197,6 @@
         linkManifestTag.href = manifestUrl;
         document.head.appendChild(linkManifestTag);
 
-        // Dynamic Service Worker Pipeline
         const swPipelineCode = `
             const CACHE_NAME = 'ledger-runtime-cache';
             self.addEventListener('install', (e) => {
@@ -190,10 +209,9 @@
         const swBlob = new Blob([swPipelineCode], { type: 'application/javascript' });
         const swUrl = URL.createObjectURL(swBlob);
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register(swUrl).catch(err => console.log("PWA execution fallback context."));
+            navigator.serviceWorker.register(swUrl).catch(err => console.log("PWA runtime fallback."));
         }
 
-        // Supabase Core API Database Endpoint Configs
         const SUPABASE_URL = "https://kvzlzxhuufeaibiezytw.supabase.co"; 
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt2emx6eGh1dWZlYWliaWV6eXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNzU4NTcsImV4cCI6MjA5NDg1MTg1N30.dT1quEcbWCBB-oEj_659TBYMssCzA0MVaXdJVetc8Fg";
         
@@ -221,7 +239,7 @@
                 document.getElementById('appContainer').classList.remove('hidden');
                 document.getElementById('syncBadge').innerText = "● Running offline local storage mode";
                 document.getElementById('syncBadge').className = "text-xs text-amber-500";
-                seedInitialAccountsData(() => renderWorkspace());
+                renderWorkspace();
                 return;
             }
 
@@ -237,7 +255,7 @@
             const password = document.getElementById('loginPassword').value;
             const errLabel = document.getElementById('authError');
 
-            if (!supabaseClient) return alert("System Setup Error: Cloud endpoints are missing configurations.");
+            if (!supabaseClient) return alert("System Setup Error: Cloud configurations missing.");
 
             const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
             if (error) {
@@ -255,7 +273,7 @@
             document.getElementById('appContainer').classList.remove('hidden');
             
             await synchronizeStorageStateFromCloudCloud();
-            seedInitialAccountsData(() => renderWorkspace());
+            renderWorkspace();
         }
 
         async function handleSessionSignOut() {
@@ -318,26 +336,65 @@
             }
         }
 
-        function seedInitialAccountsData(callback) {
-            const tx = db.transaction(['accounts', 'savings'], 'readwrite');
-            const accStore = tx.objectStore('accounts');
-            const saveStore = tx.objectStore('savings');
+        function createNewLiabilityAccount() {
+            const nameInput = document.getElementById('newAccName');
+            const limitInput = document.getElementById('newAccLimit');
+            const balInput = document.getElementById('newAccBalance');
+            const stratSelect = document.getElementById('newAccStrategy');
 
-            accStore.getAll().onsuccess = (e) => {
-                if (e.target.result.length === 0) {
-                    const defaultAccounts = [
-                        { id: 'dfcc', name: 'DFCC credit card', limit: 300000, currentBalance: 269405, initialBalance: 300000, strategy: 'attack first', strategyColor: 'bg-amber-700/40 text-amber-300 border border-amber-600/30' },
-                        { id: 'hnb', name: 'HNB credit card', limit: 150000, currentBalance: 139175, initialBalance: 150000, strategy: 'minimums for now', strategyColor: 'bg-blue-900/40 text-blue-300 border border-blue-600/30' }
-                    ];
-                    defaultAccounts.forEach(acc => accStore.put(acc));
-                    saveStore.add({ name: 'Emergency Fund', target: 250000, current: 0 });
-                    tx.oncomplete = () => {
-                        forceCloudStateBackupSynchronization();
-                        callback();
-                    };
-                } else {
-                    callback();
-                }
+            const name = nameInput.value.trim();
+            const limit = parseFloat(limitInput.value);
+            const balance = parseFloat(balInput.value);
+            const strategy = stratSelect.value;
+
+            if (!name || isNaN(limit) || isNaN(balance)) {
+                return alert("Validation Mismatch: Please check your configuration parameters.");
+            }
+
+            // Generate style rules for custom strategies dynamically
+            let colorMapping = 'bg-zinc-800/60 text-zinc-300 border border-zinc-700/40';
+            if (strategy === 'attack first') colorMapping = 'bg-amber-700/40 text-amber-300 border border-amber-600/30';
+            if (strategy === 'minimums for now') colorMapping = 'bg-blue-900/40 text-blue-300 border border-blue-600/30';
+
+            const id = 'acc_' + Date.now();
+            const newAccountObj = {
+                id,
+                name,
+                limit,
+                currentBalance: balance,
+                initialBalance: limit,
+                strategy,
+                strategyColor: colorMapping
+            };
+
+            const tx = db.transaction(['accounts'], 'readwrite');
+            tx.objectStore('accounts').put(newAccountObj);
+            tx.oncomplete = () => {
+                nameInput.value = '';
+                limitInput.value = '';
+                balInput.value = '';
+                forceCloudStateBackupSynchronization();
+                renderWorkspace();
+            };
+        }
+
+        function deleteLiabilityAccount(id) {
+            if (!confirm("Delete this liability account tracking instance entirely?")) return;
+            const tx = db.transaction(['accounts', 'statements'], 'readwrite');
+            tx.objectStore('accounts').delete(id);
+            
+            // Clean out old statement logs attached to that ID
+            const stateStore = tx.objectStore('statements');
+            stateStore.getAll().onsuccess = (e) => {
+                const logs = e.target.result;
+                logs.forEach(l => {
+                    if (l.accountId === id) stateStore.delete(l.id);
+                });
+            };
+
+            tx.oncomplete = () => {
+                forceCloudStateBackupSynchronization();
+                renderWorkspace();
             };
         }
 
@@ -359,13 +416,17 @@
                     let totalInterestPaid = 0;
                     let distinctMonths = new Set();
 
+                    if(accounts.length === 0) {
+                        container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-8 bg-zinc-900/20 rounded-xl border border-dashed border-zinc-800">No core liability tracking profiles configured yet. Add one above.</p>`;
+                    }
+
                     accounts.forEach(acc => {
                         const cardStatements = allStatements
                             .filter(s => s.accountId === acc.id)
                             .sort((a,b) => a.month.localeCompare(b.month));
 
                         let dynamicBalance = acc.currentBalance;
-                        const paidPercentage = Math.min(100, Math.max(0, ((acc.limit - dynamicBalance) / acc.limit) * 100));
+                        const paidPercentage = acc.limit > 0 ? Math.min(100, Math.max(0, ((acc.limit - dynamicBalance) / acc.limit) * 100)) : 0;
 
                         totalDebtRemaining += dynamicBalance;
                         cardStatements.forEach(s => {
@@ -393,7 +454,10 @@
                         container.innerHTML += `
                             <div class="account-card p-4 sm:p-6 rounded-xl shadow-lg w-full max-w-full box-border overflow-hidden">
                                 <div class="flex justify-between items-start mb-4 gap-2">
-                                    <h2 class="text-sm sm:text-md font-bold text-zinc-100">${acc.name}</h2>
+                                    <div>
+                                        <h2 class="text-sm sm:text-md font-bold text-zinc-100">${acc.name}</h2>
+                                        <button onclick="deleteLiabilityAccount('${acc.id}')" class="text-[10px] text-zinc-500 hover:text-rose-400 transition-colors mt-0.5 block">Delete Account</button>
+                                    </div>
                                     <span class="text-[9px] tracking-wider uppercase font-bold px-2 py-0.5 rounded shrink-0 whitespace-nowrap ${acc.strategyColor}">
                                         ${acc.strategy}
                                     </span>
@@ -446,9 +510,13 @@
                         const savingsGoals = saveEvent.target.result;
                         let totalSavedCapital = 0;
 
+                        if (savingsGoals.length === 0) {
+                            savingsContainer.innerHTML = `<p class="text-xs text-zinc-500 text-center py-6 bg-zinc-900/20 rounded-xl border border-dashed border-zinc-800">No custom goals set yet.</p>`;
+                        }
+
                         savingsGoals.forEach(goal => {
                             totalSavedCapital += goal.current;
-                            const savePercent = Math.min(100, Math.max(0, (goal.current / goal.target) * 100));
+                            const savePercent = goal.target > 0 ? Math.min(100, Math.max(0, (goal.current / goal.target) * 100)) : 0;
 
                             savingsContainer.innerHTML += `
                                 <div class="savings-card p-4 rounded-xl shadow-md w-full">
@@ -618,25 +686,6 @@
                         parsed.accounts.forEach(a => accStore.put(a));
                         if (parsed.statements) parsed.statements.forEach(s => stateStore.add(s));
                         if (parsed.savings) parsed.savings.forEach(s => saveStore.add(s));
-                    } else if (parsed.debts) {
-                        let mappedBalances = { hnb: 139175, dfcc: 269405 };
-                        let repayments = { hnb: 0, dfcc: 0 };
-                        parsed.debts.forEach(d => {
-                            const id = d.name.toLowerCase().includes('hnb') ? 'hnb' : 'dfcc';
-                            mappedBalances[id] = d.balance;
-                        });
-                        if (parsed.logs) {
-                            parsed.logs.forEach(l => {
-                                const id = l.account.toLowerCase().includes('hnb') ? 'hnb' : 'dfcc';
-                                if (l.type.includes('Repayment') || l.amount < 0) repayments[id] += Math.abs(l.amount);
-                            });
-                        }
-                        accStore.put({ id: 'dfcc', name: 'DFCC credit card', limit: 300000, currentBalance: mappedBalances.dfcc, initialBalance: 300000, strategy: 'attack first', strategyColor: 'bg-amber-700/40 text-amber-300 border border-amber-600/30' });
-                        accStore.put({ id: 'hnb', name: 'HNB credit card', limit: 150000, currentBalance: mappedBalances.hnb, initialBalance: 150000, strategy: 'minimums for now', strategyColor: 'bg-blue-900/40 text-blue-300 border border-blue-600/30' });
-                        
-                        const currentMonth = new Date().toISOString().slice(0, 7);
-                        if (repayments.dfcc > 0) stateStore.add({ accountId: 'dfcc', month: currentMonth, newBalance: mappedBalances.dfcc, paymentMade: repayments.dfcc, interestCharged: 0, balanceDrop: 300000 - mappedBalances.dfcc });
-                        if (repayments.hnb > 0) stateStore.add({ accountId: 'hnb', month: currentMonth, newBalance: mappedBalances.hnb, paymentMade: repayments.hnb, interestCharged: 0, balanceDrop: 150000 - mappedBalances.hnb });
                     }
                     tx.oncomplete = () => {
                         forceCloudStateBackupSynchronization();
